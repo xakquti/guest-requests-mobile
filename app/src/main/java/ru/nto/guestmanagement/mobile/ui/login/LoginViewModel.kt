@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class LoginViewModel(
-
+    private val requestsApi: RequestsApi
 ) : ViewModel() {
     private val _state = MutableStateFlow(LoginContract.State())
     val state = _state.asStateFlow()
