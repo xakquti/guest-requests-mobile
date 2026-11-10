@@ -32,7 +32,15 @@ class LoginViewModel(
     }
 
     private fun login(){
-
+        viewModelScope.launch {
+            _state.update {
+                it.copy(
+                    isLoading = true
+                )
+            }
+            val code = _state.value.login!!
+            requestsApi.auth(code)
+        }
     }
 
     private fun filterLogin(login: String) : Boolean{
