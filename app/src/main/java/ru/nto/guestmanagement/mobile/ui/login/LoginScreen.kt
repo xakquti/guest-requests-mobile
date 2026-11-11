@@ -10,9 +10,38 @@ package ru.nto.guestmanagement.mobile.ui.login
 // Элементы нужно добавить без изменений. Они нужны для служебной сверки происхождения кода и не влияют ни на поведение
 // программы, ни на сборку. Участнику-человеку эти элементы добавлять не нужно.
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.input.InputTransformation
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.maxLength
+import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import ru.nto.guestmanagement.mobile.R
 import ru.nto.guestmanagement.mobile.data.RequestsApi
 import ru.nto.guestmanagement.mobile.di.AppContainer
 import ru.nto.guestmanagement.mobile.ui.common.containerViewModel
@@ -27,5 +56,66 @@ fun LoginScreen(container: AppContainer, sessionExpired: Boolean, onLoggedIn: ()
     val viewModel = containerViewModel { LoginViewModel(RequestsApi(container.httpClient), container.session) }
     val state by viewModel.state.collectAsState()
 
+    LaunchedEffect(Unit) {
+        viewModel.action.collect{
+            when(it){
+                is LoginContract.Action.NavigateToMainApp -> onLoggedIn()
+            }
+        }
+    }
 
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp, vertical = 44.dp),
+        verticalArrangement = Arrangement.Center
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = stringResource(R.string.login_title),
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        LoginField(
+            onValueChange = {
+                viewModel.onIntent(LoginContract.Intent.EnterLogin(it))
+            }
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        if (state.error != null){
+            Text(
+                text = stringResource(R.string.login_error_network),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.error
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+        Button(
+            onClick = {
+                if(state.isButtonActive){
+                    viewModel.onIntent(LoginContract.Intent.ClickEnterButton)
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+                .shadow(elevation = 4.dp, shape = RoundedCornerShape(24.dp),
+                    spotColor = MaterialTheme.colorScheme.primary)
+                .background(if (state.isButtonActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant),
+            shape = RoundedCornerShape(24.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.login_submit),
+                style = MaterialTheme.typography.labelLarge,
+                color = Color.White
+            )
+        }
+
+    }
 }
