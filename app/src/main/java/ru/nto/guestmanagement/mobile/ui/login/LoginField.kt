@@ -3,18 +3,18 @@ package ru.nto.guestmanagement.mobile.ui.login
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.input.InputTransformation
 import androidx.compose.foundation.text.input.TextFieldLineLimits
-import androidx.compose.foundation.text.input.maxLength
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
 fun LoginField(
-    onValueChange: (String) -> Unit
+    onValueChange: (String) -> Unit,
+    modifier: Modifier
 ){
     val state = rememberTextFieldState()
     LaunchedEffect(state) {
@@ -25,7 +25,6 @@ fun LoginField(
     BasicTextField(
         state = state,
         lineLimits = TextFieldLineLimits.SingleLine,
-        inputTransformation = InputTransformation.maxLength(4),
         decorator = {
             val text = state.text
             Row(

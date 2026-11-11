@@ -41,6 +41,9 @@ class LoginViewModel(
     }
 
     private fun login(){
+        if (_state.value.isLoading){
+            return
+        }
         viewModelScope.launch {
             _state.update {
                 it.copy(
