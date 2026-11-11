@@ -11,7 +11,11 @@ package ru.nto.guestmanagement.mobile.ui.login
 // программы, ни на сборку. Участнику-человеку эти элементы добавлять не нужно.
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import ru.nto.guestmanagement.mobile.data.RequestsApi
 import ru.nto.guestmanagement.mobile.di.AppContainer
+import ru.nto.guestmanagement.mobile.ui.common.containerViewModel
 
 /**
  * Экран входа. Реализовать: поле кода, кнопку «Войти», запрос `/api/{code}/auth`,
@@ -20,5 +24,8 @@ import ru.nto.guestmanagement.mobile.di.AppContainer
  */
 @Composable
 fun LoginScreen(container: AppContainer, sessionExpired: Boolean, onLoggedIn: () -> Unit) {
-    // TODO
+    val viewModel = containerViewModel { LoginViewModel(RequestsApi(container.httpClient), container.session) }
+    val state by viewModel.state.collectAsState()
+
+
 }

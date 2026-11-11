@@ -12,4 +12,8 @@ sealed interface LoginContract{
         data class EnterLogin(val login: String) : Intent
         data object ClickEnterButton : Intent
     }
+
+    sealed interface Action {
+        data object NavigateToMainApp : Action
+    }
 }
