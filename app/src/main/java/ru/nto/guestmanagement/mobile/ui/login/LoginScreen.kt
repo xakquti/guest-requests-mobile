@@ -52,6 +52,8 @@ fun LoginScreen(container: AppContainer, sessionExpired: Boolean, onLoggedIn: ()
     val viewModel = containerViewModel { LoginViewModel(RequestsApi(container.httpClient), container.session) }
     val state by viewModel.state.collectAsState()
 
+    //посмотреть на дизайн поля ввода, добавить логику sessionExpired, проверить все требования
+
     LaunchedEffect(Unit) {
         if (!sessionExpired && !container.session.current().isNullOrEmpty()){
             onLoggedIn()
