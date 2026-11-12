@@ -115,15 +115,15 @@ fun LoginScreen(container: AppContainer, sessionExpired: Boolean, onLoggedIn: ()
                 text = state.error!!,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.testTag(AUTH_ERROR)
+                modifier = Modifier.testTag(AUTH_ERROR).align(Alignment.CenterHorizontally)
             )
             Spacer(modifier = Modifier.height(16.dp))
         }
         if (state.isLoading) {
             CircularProgressIndicator(
-                color = MaterialTheme.colorScheme.onPrimary,
+                color = MaterialTheme.colorScheme.primary,
                 gapSize = 24.dp,
-                modifier = Modifier.testTag(AUTH_LOADING)
+                modifier = Modifier.testTag(AUTH_LOADING).align(Alignment.CenterHorizontally)
             )
         }
 
