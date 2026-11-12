@@ -5,7 +5,8 @@ sealed interface LoginContract{
         val isLoading: Boolean = false,
         val error: String? = null,
         val login: String? = null,
-        val isButtonActive : Boolean = false
+        val isButtonActive : Boolean = false,
+        val isSessionExpired : Boolean = false
     )
 
     sealed interface Intent {

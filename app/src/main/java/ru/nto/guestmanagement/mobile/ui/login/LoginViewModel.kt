@@ -15,13 +15,27 @@ import ru.nto.guestmanagement.mobile.data.SessionStorage
 
 class LoginViewModel(
     private val requestsApi: RequestsApi,
-    private val sessionStorage: SessionStorage
+    private val sessionStorage: SessionStorage,
+    sessionExpired : Boolean
 ) : ViewModel() {
     private val _state = MutableStateFlow(LoginContract.State())
     val state = _state.asStateFlow()
 
     private val _action = MutableSharedFlow<LoginContract.Action>()
     val action = _action.asSharedFlow()
+
+    init {
+        if (sessionExpired){
+            viewModelScope.launch {
+                sessionStorage.clear()
+            }
+            _state.update {
+                it.copy(
+                    isSessionExpired = true
+                )
+            }
+        }
+    }
 
     fun onIntent(intent: LoginContract.Intent) {
         when(intent){
@@ -35,7 +49,8 @@ class LoginViewModel(
             it.copy(
                 login = login,
                 isButtonActive = filterLogin(login),
-                error = null
+                error = null,
+                isSessionExpired = if(login.isNotEmpty()) false else it.isSessionExpired
             )
         }
     }
@@ -44,15 +59,17 @@ class LoginViewModel(
         if (_state.value.isLoading){
             return
         }
+        val code = _state.value.login ?: return
+
         viewModelScope.launch {
             _state.update {
                 it.copy(
                     isLoading = true,
                     isButtonActive = false,
-                    error = null
+                    error = null,
+                    isSessionExpired = false
                 )
             }
-            val code = _state.value.login ?: return@launch
 
             when(val auth = requestsApi.auth(code)){
                 is ApiResult.Success<*> -> {

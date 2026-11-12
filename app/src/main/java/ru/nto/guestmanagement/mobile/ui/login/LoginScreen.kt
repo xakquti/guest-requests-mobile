@@ -28,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.testTag
@@ -39,6 +40,7 @@ import ru.nto.guestmanagement.mobile.di.AppContainer
 import ru.nto.guestmanagement.mobile.ui.TestIds.AUTH_CODE
 import ru.nto.guestmanagement.mobile.ui.TestIds.AUTH_ERROR
 import ru.nto.guestmanagement.mobile.ui.TestIds.AUTH_LOADING
+import ru.nto.guestmanagement.mobile.ui.TestIds.AUTH_SESSION_EXPIRED
 import ru.nto.guestmanagement.mobile.ui.TestIds.AUTH_SUBMIT
 import ru.nto.guestmanagement.mobile.ui.common.containerViewModel
 
@@ -49,20 +51,25 @@ import ru.nto.guestmanagement.mobile.ui.common.containerViewModel
  */
 @Composable
 fun LoginScreen(container: AppContainer, sessionExpired: Boolean, onLoggedIn: () -> Unit) {
-    val viewModel = containerViewModel { LoginViewModel(RequestsApi(container.httpClient), container.session) }
+    val viewModel = containerViewModel {
+        LoginViewModel(
+            RequestsApi(container.httpClient),
+            container.session, sessionExpired
+        )
+    }
     val state by viewModel.state.collectAsState()
 
     //посмотреть на дизайн поля ввода, добавить логику sessionExpired, проверить все требования
 
     LaunchedEffect(Unit) {
-        if (!sessionExpired && !container.session.current().isNullOrEmpty()){
+        if (!sessionExpired && !container.session.current().isNullOrEmpty()) {
             onLoggedIn()
         }
     }
 
     LaunchedEffect(Unit) {
-        viewModel.action.collect{
-            when(it){
+        viewModel.action.collect {
+            when (it) {
                 is LoginContract.Action.NavigateToMainApp -> onLoggedIn()
             }
         }
@@ -87,13 +94,23 @@ fun LoginScreen(container: AppContainer, sessionExpired: Boolean, onLoggedIn: ()
         }
         Spacer(modifier = Modifier.height(16.dp))
         LoginField(
+            value = state.login.orEmpty(),
             onValueChange = {
                 viewModel.onIntent(LoginContract.Intent.EnterLogin(it))
             },
-            modifier = Modifier.testTag(AUTH_CODE)
+            modifier = Modifier.testTag(AUTH_CODE).align(Alignment.CenterHorizontally)
         )
         Spacer(modifier = Modifier.height(16.dp))
-        if (state.error != null){
+        if (state.isSessionExpired) {
+            Text(
+                text = stringResource(R.string.login_session_expired),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.testTag(AUTH_SESSION_EXPIRED)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+        if (state.error != null) {
             Text(
                 text = state.error!!,
                 style = MaterialTheme.typography.bodyMedium,
@@ -102,34 +119,39 @@ fun LoginScreen(container: AppContainer, sessionExpired: Boolean, onLoggedIn: ()
             )
             Spacer(modifier = Modifier.height(16.dp))
         }
+        if (state.isLoading) {
+            CircularProgressIndicator(
+                color = MaterialTheme.colorScheme.onPrimary,
+                gapSize = 24.dp,
+                modifier = Modifier.testTag(AUTH_LOADING)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         Button(
+            enabled = state.isButtonActive && !state.isLoading,
             onClick = {
-                if(state.isButtonActive){
-                    viewModel.onIntent(LoginContract.Intent.ClickEnterButton)
-                }
+                viewModel.onIntent(LoginContract.Intent.ClickEnterButton)
             },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp)
-                .shadow(elevation = 4.dp, shape = RoundedCornerShape(24.dp),
-                    spotColor = MaterialTheme.colorScheme.primary)
+                .shadow(
+                    elevation = 4.dp, shape = RoundedCornerShape(24.dp),
+                    spotColor = MaterialTheme.colorScheme.primary
+                )
                 .background(if (state.isButtonActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
                 .testTag(AUTH_SUBMIT),
             shape = RoundedCornerShape(24.dp)
         ) {
-            if (!state.isLoading){
-                Text(
-                    text = stringResource(R.string.login_submit),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onPrimary
-                )
-            } else {
-                CircularProgressIndicator(
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    gapSize = 24.dp,
-                    modifier = Modifier.testTag(AUTH_LOADING)
-                )
-            }
+
+            Text(
+                text = stringResource(R.string.login_submit),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onPrimary
+            )
+
         }
 
     }
