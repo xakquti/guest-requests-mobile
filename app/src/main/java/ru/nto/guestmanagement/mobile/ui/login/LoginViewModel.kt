@@ -77,7 +77,8 @@ class LoginViewModel(
                     _state.update {
                         it.copy(
                             isLoading = false,
-                            error = null
+                            error = null,
+                            isButtonActive = filterLogin(it.login)
                         )
                     }
                     _action.emit(LoginContract.Action.NavigateToMainApp)

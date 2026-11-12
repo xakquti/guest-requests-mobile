@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -122,8 +123,8 @@ fun LoginScreen(container: AppContainer, sessionExpired: Boolean, onLoggedIn: ()
         if (state.isLoading) {
             CircularProgressIndicator(
                 color = MaterialTheme.colorScheme.primary,
-                gapSize = 24.dp,
-                modifier = Modifier.testTag(AUTH_LOADING).align(Alignment.CenterHorizontally)
+                modifier = Modifier.size(32.dp)
+                    .testTag(AUTH_LOADING).align(Alignment.CenterHorizontally)
             )
         }
 
@@ -141,7 +142,7 @@ fun LoginScreen(container: AppContainer, sessionExpired: Boolean, onLoggedIn: ()
                     elevation = 4.dp, shape = RoundedCornerShape(24.dp),
                     spotColor = MaterialTheme.colorScheme.primary
                 )
-                .background(if (state.isButtonActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
+                .background(MaterialTheme.colorScheme.primary)
                 .testTag(AUTH_SUBMIT),
             shape = RoundedCornerShape(24.dp)
         ) {
