@@ -14,7 +14,7 @@ sealed interface LoginContract{
         data object ClickEnterButton : Intent
     }
 
-    sealed interface Action {
-        data object NavigateToMainApp : Action
+    sealed interface Event {
+        data object NavigateToMainApp : Event
     }
 }

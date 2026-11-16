@@ -21,7 +21,7 @@ class LoginViewModel(
     private val _state = MutableStateFlow(LoginContract.State())
     val state = _state.asStateFlow()
 
-    private val _action = MutableSharedFlow<LoginContract.Action>()
+    private val _action = MutableSharedFlow<LoginContract.Event>()
     val action = _action.asSharedFlow()
 
     init {
@@ -81,7 +81,7 @@ class LoginViewModel(
                             isButtonActive = filterLogin(it.login)
                         )
                     }
-                    _action.emit(LoginContract.Action.NavigateToMainApp)
+                    _action.emit(LoginContract.Event.NavigateToMainApp)
                 }
                 is ApiResult.Failure -> {
                     _state.update {

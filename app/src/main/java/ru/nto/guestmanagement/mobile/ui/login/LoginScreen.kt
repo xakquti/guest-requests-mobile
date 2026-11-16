@@ -71,7 +71,7 @@ fun LoginScreen(container: AppContainer, sessionExpired: Boolean, onLoggedIn: ()
     LaunchedEffect(Unit) {
         viewModel.action.collect {
             when (it) {
-                is LoginContract.Action.NavigateToMainApp -> onLoggedIn()
+                is LoginContract.Event.NavigateToMainApp -> onLoggedIn()
             }
         }
     }
