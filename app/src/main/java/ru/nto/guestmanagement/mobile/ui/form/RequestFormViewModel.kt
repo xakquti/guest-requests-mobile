@@ -8,6 +8,8 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import ru.nto.guestmanagement.mobile.data.ApiResult
+import ru.nto.guestmanagement.mobile.data.CreateRequestBody
 import ru.nto.guestmanagement.mobile.data.RequestsApi
 import ru.nto.guestmanagement.mobile.data.SessionStorage
 
@@ -38,12 +40,48 @@ class RequestFormViewModel(
     public fun onIntent(intent : RequestFormContract.Intent){
         when(intent){
             is RequestFormContract.Intent.OnFormSend -> sendForm()
-            is RequestFormContract.Intent.EnterFullName -> TODO()
-            is RequestFormContract.Intent.EnterOrganization -> TODO()
-            is RequestFormContract.Intent.EnterPhoneNumber -> TODO()
-            is RequestFormContract.Intent.EnterPurpose -> TODO()
-            is RequestFormContract.Intent.EnterValidFrom -> TODO()
-            is RequestFormContract.Intent.EnterValidTo -> TODO()
+            is RequestFormContract.Intent.EnterFullName -> {
+                _state.update {
+                    it.copy(
+                        fio = intent.fullName
+                    )
+                }
+            }
+            is RequestFormContract.Intent.EnterOrganization -> {
+                _state.update {
+                    it.copy(
+                        organization = intent.organization
+                    )
+                }
+            }
+            is RequestFormContract.Intent.EnterPhoneNumber -> {
+                _state.update {
+                    it.copy(
+                        phoneNumber = intent.phoneNumber
+                    )
+                }
+            }
+            is RequestFormContract.Intent.EnterPurpose -> {
+                _state.update {
+                    it.copy(
+                        purpose = intent.purpose
+                    )
+                }
+            }
+            is RequestFormContract.Intent.EnterValidFrom -> {
+                _state.update {
+                    it.copy(
+                        validFrom = intent.validFrom
+                    )
+                }
+            }
+            is RequestFormContract.Intent.EnterValidTo -> {
+                _state.update {
+                    it.copy(
+                        validTo = intent.validTo
+                    )
+                }
+            }
         }
     }
 
@@ -93,6 +131,31 @@ class RequestFormViewModel(
                     errorPurpose = validatePurpose(purpose),
                     isLoading = false
                 )
+            }
+        }
+
+        //TODO валидация времени
+
+        viewModelScope.launch {
+            _state.update {
+                it.copy(
+                    isLoading = true,
+                    isButtonActive = false,
+                    error = null,
+                    isSessionExpired = false
+                )
+            }
+
+            val code = sessionStorage.code.toString()
+            val body = CreateRequestBody(fullName, phoneNumber, organization, purpose, validFrom, validTo)
+            when(val sendForm = requestsApi.create(code, body)){
+                is ApiResult.Success -> TODO()
+                is ApiResult.Conflict -> TODO()
+                is ApiResult.Failure -> TODO()
+                is ApiResult.FieldErrors -> TODO()
+                ApiResult.Network -> TODO()
+                ApiResult.NotFound -> TODO()
+                ApiResult.Unauthorized -> TODO()
             }
         }
 

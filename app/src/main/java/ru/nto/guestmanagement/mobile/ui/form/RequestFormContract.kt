@@ -3,6 +3,7 @@ package ru.nto.guestmanagement.mobile.ui.form
 sealed interface RequestFormContract {
     data class State(
         val isLoading : Boolean = false,
+        val isButtonActive : Boolean = true,
         //errors
         val error : String? = null,
         val errorFullName : String? = null,
