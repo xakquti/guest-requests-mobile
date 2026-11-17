@@ -24,6 +24,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,8 +35,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import ru.nto.guestmanagement.mobile.R
 import ru.nto.guestmanagement.mobile.data.RequestsApi
@@ -42,6 +46,22 @@ import ru.nto.guestmanagement.mobile.di.AppContainer
 import ru.nto.guestmanagement.mobile.ui.TestIds.AUTH_ERROR
 import ru.nto.guestmanagement.mobile.ui.TestIds.AUTH_LOADING
 import ru.nto.guestmanagement.mobile.ui.TestIds.AUTH_SUBMIT
+import ru.nto.guestmanagement.mobile.ui.TestIds.FORM_DATE
+import ru.nto.guestmanagement.mobile.ui.TestIds.FORM_ERROR_DATE
+import ru.nto.guestmanagement.mobile.ui.TestIds.FORM_ERROR_FULL_NAME
+import ru.nto.guestmanagement.mobile.ui.TestIds.FORM_ERROR_ORGANIZATION
+import ru.nto.guestmanagement.mobile.ui.TestIds.FORM_ERROR_PHONE
+import ru.nto.guestmanagement.mobile.ui.TestIds.FORM_ERROR_PURPOSE
+import ru.nto.guestmanagement.mobile.ui.TestIds.FORM_ERROR_VALID_FROM
+import ru.nto.guestmanagement.mobile.ui.TestIds.FORM_ERROR_VALID_TO
+import ru.nto.guestmanagement.mobile.ui.TestIds.FORM_FULL_NAME
+import ru.nto.guestmanagement.mobile.ui.TestIds.FORM_LOADING
+import ru.nto.guestmanagement.mobile.ui.TestIds.FORM_ORGANIZATION
+import ru.nto.guestmanagement.mobile.ui.TestIds.FORM_PHONE
+import ru.nto.guestmanagement.mobile.ui.TestIds.FORM_PURPOSE
+import ru.nto.guestmanagement.mobile.ui.TestIds.FORM_SUBMIT
+import ru.nto.guestmanagement.mobile.ui.TestIds.FORM_TIME_FROM
+import ru.nto.guestmanagement.mobile.ui.TestIds.FORM_TIME_TO
 import ru.nto.guestmanagement.mobile.ui.common.containerViewModel
 import ru.nto.guestmanagement.mobile.ui.login.LoginContract
 
@@ -91,7 +111,7 @@ fun RequestFormScreen(
         Field(
                 hintText = "",
                 fieldName = stringResource(R.string.form_full_name),
-                modifier = Modifier
+                modifier = Modifier.testTag(FORM_FULL_NAME)
         )
         if(state.errorFullName != null){
             Spacer(modifier = Modifier.height(4.dp))
@@ -99,6 +119,7 @@ fun RequestFormScreen(
                 text = stringResource(R.string.form_error_full_name),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.testTag(FORM_ERROR_FULL_NAME)
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
@@ -107,7 +128,7 @@ fun RequestFormScreen(
         Field(
             hintText = "+7",
             fieldName = stringResource(R.string.form_phone),
-            modifier = Modifier
+            modifier = Modifier.testTag(FORM_PHONE)
         )
         if(state.errorPhoneNumber != null){
             Spacer(modifier = Modifier.height(4.dp))
@@ -115,6 +136,7 @@ fun RequestFormScreen(
                 text = stringResource(R.string.form_error_phone),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.testTag(FORM_ERROR_PHONE)
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
@@ -123,7 +145,7 @@ fun RequestFormScreen(
         Field(
             hintText = "",
             fieldName = stringResource(R.string.form_phone),
-            modifier = Modifier
+            modifier = Modifier.testTag(FORM_ORGANIZATION)
         )
         if(state.errorOrganization != null){
             Spacer(modifier = Modifier.height(4.dp))
@@ -131,6 +153,7 @@ fun RequestFormScreen(
                 text = stringResource(R.string.form_error_organization),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.testTag(FORM_ERROR_ORGANIZATION)
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
@@ -139,7 +162,7 @@ fun RequestFormScreen(
         Field(
             hintText = "",
             fieldName = stringResource(R.string.form_purpose),
-            modifier = Modifier
+            modifier = Modifier.testTag(FORM_PURPOSE)
         )
         if(state.errorPurpose != null){
             Spacer(modifier = Modifier.height(4.dp))
@@ -147,6 +170,7 @@ fun RequestFormScreen(
                 text = stringResource(R.string.form_error_purpose),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.testTag(FORM_ERROR_PURPOSE)
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
@@ -155,7 +179,7 @@ fun RequestFormScreen(
         Field(
             hintText = "ДД.ММ.ГГГГ",
             fieldName = stringResource(R.string.form_date),
-            modifier = Modifier
+            modifier = Modifier.testTag(FORM_DATE)
         )
         if(state.errorDate != null){
             Spacer(modifier = Modifier.height(4.dp))
@@ -163,6 +187,7 @@ fun RequestFormScreen(
                 text = stringResource(R.string.form_error_date),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.testTag(FORM_ERROR_DATE)
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
@@ -171,7 +196,7 @@ fun RequestFormScreen(
         Field(
             hintText = "ЧЧ:ММ",
             fieldName = stringResource(R.string.form_time_from),
-            modifier = Modifier
+            modifier = Modifier.testTag(FORM_TIME_FROM)
         )
         if(state.errorValidFrom != null){
             Spacer(modifier = Modifier.height(4.dp))
@@ -179,6 +204,7 @@ fun RequestFormScreen(
                 text = state.validFrom!!,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.testTag(FORM_ERROR_VALID_FROM)
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
@@ -187,7 +213,7 @@ fun RequestFormScreen(
         Field(
             hintText = "ЧЧ:ММ",
             fieldName = stringResource(R.string.form_time_to),
-            modifier = Modifier
+            modifier = Modifier.testTag(FORM_TIME_TO)
         )
         if(state.errorValidTo != null){
             Spacer(modifier = Modifier.height(4.dp))
@@ -195,6 +221,7 @@ fun RequestFormScreen(
                 text = state.validTo!!,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.testTag(FORM_ERROR_VALID_TO)
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
@@ -203,7 +230,7 @@ fun RequestFormScreen(
             CircularProgressIndicator(
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(32.dp)
-                    .testTag(AUTH_LOADING).align(Alignment.CenterHorizontally)
+                    .testTag(FORM_LOADING).align(Alignment.CenterHorizontally)
             )
             Spacer(modifier = Modifier.height(16.dp))
         }
@@ -221,7 +248,7 @@ fun RequestFormScreen(
                     spotColor = MaterialTheme.colorScheme.primary
                 )
                 .background(MaterialTheme.colorScheme.primary)
-                .testTag(AUTH_SUBMIT),
+                .testTag(FORM_SUBMIT),
             shape = RoundedCornerShape(24.dp)
         ) {
 
