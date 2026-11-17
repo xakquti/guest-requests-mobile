@@ -12,11 +12,13 @@ sealed interface RequestFormContract {
         val errorValidFrom : String? = null,
         val errorValidTo : String? = null,
         val errorPhoneNumber : String? = null,
+        val errorDate : String? = null,
         //fields
         val fio : String? = null,
         val phoneNumber : String? = null,
         val organization : String? = null,
         val purpose : String? = null,
+        val date : String? = null,
         val validFrom : String? = null,
         val validTo : String? = null,
         val isSessionExpired : Boolean = false
@@ -28,6 +30,7 @@ sealed interface RequestFormContract {
         data class EnterPhoneNumber(val phoneNumber : String) : Intent
         data class EnterOrganization(val organization : String) : Intent
         data class EnterPurpose(val purpose : String) : Intent
+        data class EnterDate(val date : String) : Intent
         data class EnterValidFrom(val validFrom : String) : Intent
         data class EnterValidTo(val validTo : String) : Intent
     }
@@ -35,5 +38,6 @@ sealed interface RequestFormContract {
     sealed interface Event{
         data object OnBack : Event
         data object OnSessionExpired : Event
+        data object OnCreated : Event
     }
 }

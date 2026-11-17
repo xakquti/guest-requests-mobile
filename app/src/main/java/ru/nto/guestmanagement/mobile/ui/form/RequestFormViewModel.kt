@@ -12,12 +12,21 @@ import ru.nto.guestmanagement.mobile.data.ApiResult
 import ru.nto.guestmanagement.mobile.data.CreateRequestBody
 import ru.nto.guestmanagement.mobile.data.RequestsApi
 import ru.nto.guestmanagement.mobile.data.SessionStorage
+import ru.nto.guestmanagement.mobile.data.TimeProvider
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
+import java.time.format.ResolverStyle
 
 class RequestFormViewModel(
     private val requestsApi: RequestsApi,
     private val sessionStorage: SessionStorage,
+    private val timeProvider: TimeProvider,
     sessionExpired : Boolean
 ) : ViewModel() {
+    val dateFormat: DateTimeFormatter? = DateTimeFormatter.ofPattern("dd.MM.yyyy").withResolverStyle(ResolverStyle.STRICT)
+    val timeFormat: DateTimeFormatter? = DateTimeFormatter.ofPattern("HH:mm").withResolverStyle(ResolverStyle.STRICT)
     private val _state = MutableStateFlow(RequestFormContract.State())
     val state = _state.asStateFlow()
 
@@ -37,48 +46,63 @@ class RequestFormViewModel(
         }
     }
 
-    public fun onIntent(intent : RequestFormContract.Intent){
+    fun onIntent(intent : RequestFormContract.Intent){
         when(intent){
             is RequestFormContract.Intent.OnFormSend -> sendForm()
             is RequestFormContract.Intent.EnterFullName -> {
                 _state.update {
                     it.copy(
-                        fio = intent.fullName
+                        fio = intent.fullName,
+                        isButtonActive = true
                     )
                 }
             }
             is RequestFormContract.Intent.EnterOrganization -> {
                 _state.update {
                     it.copy(
-                        organization = intent.organization
+                        organization = intent.organization,
+                        isButtonActive = true
                     )
                 }
             }
             is RequestFormContract.Intent.EnterPhoneNumber -> {
                 _state.update {
                     it.copy(
-                        phoneNumber = intent.phoneNumber
+                        phoneNumber = intent.phoneNumber,
+                        isButtonActive = true
                     )
                 }
             }
             is RequestFormContract.Intent.EnterPurpose -> {
                 _state.update {
                     it.copy(
-                        purpose = intent.purpose
+                        purpose = intent.purpose,
+                        isButtonActive = true
                     )
                 }
             }
             is RequestFormContract.Intent.EnterValidFrom -> {
                 _state.update {
                     it.copy(
-                        validFrom = intent.validFrom
+                        validFrom = intent.validFrom,
+                        isButtonActive = true
                     )
                 }
             }
             is RequestFormContract.Intent.EnterValidTo -> {
                 _state.update {
                     it.copy(
-                        validTo = intent.validTo
+                        validTo = intent.validTo,
+                        isButtonActive = true
+                    )
+                }
+            }
+
+            is RequestFormContract.Intent.EnterDate -> {
+                _state.update {
+                    it.copy(
+                        date = intent.date,
+                        isButtonActive = true
                     )
                 }
             }
@@ -97,6 +121,8 @@ class RequestFormViewModel(
         val purpose = _state.value.purpose
         val validFrom = _state.value.validFrom
         val validTo = _state.value.validTo
+        val date = _state.value.date
+        val timeNow = timeProvider.now()
 
         if (validateFullName(fullName) != null){
             _state.update {
@@ -104,6 +130,7 @@ class RequestFormViewModel(
                     isLoading = false
                 )
             }
+            return
         }
 
 
@@ -114,15 +141,17 @@ class RequestFormViewModel(
                     isLoading = false
                 )
             }
+            return
         }
 
-        if (organization != null && organization.length > 150){
+        if (organization != null && organization.trim().length > 150){
             _state.update {
                 it.copy(
                     errorOrganization = "Количество символов превышает 150",
                     isLoading = false
                 )
             }
+            return
         }
 
         if (validatePurpose(purpose) != null){
@@ -132,9 +161,21 @@ class RequestFormViewModel(
                     isLoading = false
                 )
             }
+            return
         }
 
-        //TODO валидация времени
+        val te = validateTime(validFrom, validTo, timeNow, date)
+        if (te.timeToError != null || te.timeFromError != null || te.dateError != null){
+            _state.update {
+                it.copy(
+                    isLoading = false,
+                    errorDate = te.dateError,
+                    errorValidFrom = te.timeFromError,
+                    errorValidTo = te.timeToError
+                )
+            }
+            return
+        }
 
         viewModelScope.launch {
             _state.update {
@@ -146,26 +187,139 @@ class RequestFormViewModel(
                 )
             }
 
-            val code = sessionStorage.code.toString()
-            val body = CreateRequestBody(fullName, phoneNumber, organization, purpose, validFrom, validTo)
+            val parseDate = LocalDate.parse(date?.trim(), dateFormat)
+            val parseTimeFrom = LocalTime.parse(validFrom?.trim(), timeFormat)
+            val parseTimeTo = LocalTime.parse(validTo?.trim(), timeFormat)
+
+            val dateTimeFrom = LocalDateTime.of(parseDate, parseTimeFrom)
+            val dateTimeTo = LocalDateTime.of(parseDate, parseTimeTo)
+
+            val code = sessionStorage.current() ?: return@launch
+
+            val body = CreateRequestBody(
+                fullName,
+                phoneNumber,
+                organization,
+                purpose,
+                dateTimeFrom.toString(),
+                dateTimeTo.toString()
+            )
             when(val sendForm = requestsApi.create(code, body)){
-                is ApiResult.Success -> TODO()
-                is ApiResult.Conflict -> TODO()
-                is ApiResult.Failure -> TODO()
-                is ApiResult.FieldErrors -> TODO()
-                ApiResult.Network -> TODO()
-                ApiResult.NotFound -> TODO()
-                ApiResult.Unauthorized -> TODO()
+                is ApiResult.Success -> {
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            error = null,
+                            isButtonActive = true
+                        )
+                    }
+                    _event.emit(RequestFormContract.Event.OnCreated)
+                }
+                is ApiResult.Conflict -> {
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            error = sendForm.message,
+                            isButtonActive = true
+                        )
+                    }
+                }
+
+                is ApiResult.Failure -> {
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            error = sendForm.message,
+                            isButtonActive = true
+                        )
+                    }
+                }
+                is ApiResult.FieldErrors -> {
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            error = "Ошибка в поле",
+                            isButtonActive = true
+                        )
+                    }
+                }
+                is ApiResult.Network -> {
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            error = "Нет связи",
+                            isButtonActive = true
+                        )
+                    }
+                }
+
+                ApiResult.NotFound -> {
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            error = "Ошибка в поле",
+                            isButtonActive = true
+                        )
+                    }
+                }
+                ApiResult.Unauthorized -> {
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            error = "Неизвестный код",
+                            isSessionExpired = true,
+                            isButtonActive = true
+                        )
+                    }
+                    sessionStorage.clear()
+                    _event.emit(RequestFormContract.Event.OnSessionExpired)
+                }
             }
         }
 
 
     }
 
+    private fun validateTime(timeFrom: String?, timeTo : String?, timeNow :  LocalDateTime, date : String?) : TimeError{
+
+        val parseDate = runCatching { LocalDate.parse(date?.trim(), dateFormat) }.getOrNull()
+        val parseTimeFrom = runCatching { LocalTime.parse(timeFrom?.trim(), timeFormat) }.getOrNull()
+        val parseTimeTo = runCatching { LocalTime.parse(timeTo?.trim(), timeFormat) }.getOrNull()
+
+        val dateTimeFrom = if(parseDate != null && parseTimeFrom != null)
+            LocalDateTime.of(parseDate, parseTimeFrom) else null
+
+        val dateTimeTo = if (parseDate != null && parseTimeTo != null)
+            LocalDateTime.of(parseDate, parseTimeTo) else null
+
+        val dateError = when{
+            date.isNullOrEmpty() -> "Отстуствует дата"
+            parseDate == null -> "Неверная дата"
+            else -> null
+        }
+
+        val timeFromError = when{
+            timeFrom.isNullOrEmpty() -> "Отсутствует время начала"
+            parseTimeFrom == null -> "Неверное время начала"
+            dateTimeFrom != null && dateTimeFrom.isBefore(timeNow) -> "Время начала не может быть в прошлом"
+            else -> null
+        }
+
+        val timeToError = when {
+            timeTo.isNullOrEmpty() -> "Отсутствует время окончания"
+            parseTimeTo == null -> "Неверное время окончания"
+            dateTimeTo != null && !dateTimeTo.isAfter(dateTimeFrom) -> "Время окончания должно быть позже времени начала"
+            else -> null
+        }
+
+
+        return TimeError(dateError, timeFromError, timeToError)
+    }
+
     private fun validateFullName(fullName : String?) : String? {
         return if (fullName.isNullOrEmpty()){
             "Отсутвует ФИО"
-        } else if (fullName.trim().length in 5..150){
+        } else if (fullName.trim().length !in 5..150){
             "ФИО должно быть в пределах 5-150 символов"
         } else {
             null
@@ -178,10 +332,10 @@ class RequestFormViewModel(
         }
         val phoneTrim = phone.trim()
 
-        return if (!(phoneTrim.startsWith("+7")) || (phoneTrim.length != 12) || !(phoneTrim.substring(1..11).any { it !in '0'..'9' })){
-            "Номер телефона не соответствует формату"
-        } else {
+        return if ((phoneTrim.startsWith("+7")) && (phoneTrim.length == 12) && (phoneTrim.substring(2).all { it in '0'..'9' })){
             null
+        } else {
+            "Номер телефона не соответствует формату"
         }
     }
 

@@ -72,7 +72,7 @@ class LoginViewModel(
             }
 
             when(val auth = requestsApi.auth(code)){
-                is ApiResult.Success<*> -> {
+                is ApiResult.Success -> {
                     sessionStorage.save(code)
                     _state.update {
                         it.copy(
