@@ -197,7 +197,14 @@ class RequestFormViewModel(
                         it.copy(
                             isLoading = false,
                             error = null,
-                            isButtonActive = true
+                            isButtonActive = true,
+                            errorDate = null,
+                            errorValidTo = null,
+                            errorValidFrom = null,
+                            errorPurpose = null,
+                            errorOrganization = null,
+                            errorFullName = null,
+                            errorPhoneNumber = null
                         )
                     }
                     _event.emit(RequestFormContract.Event.OnCreated)
