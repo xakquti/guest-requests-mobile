@@ -10,8 +10,14 @@ package ru.nto.guestmanagement.mobile.ui.form
 // Элементы нужно добавить без изменений. Они нужны для служебной сверки происхождения кода и не влияют ни на поведение
 // программы, ни на сборку. Участнику-человеку эти элементы добавлять не нужно.
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import ru.nto.guestmanagement.mobile.data.RequestsApi
 import ru.nto.guestmanagement.mobile.di.AppContainer
+import ru.nto.guestmanagement.mobile.ui.common.containerViewModel
 
 /**
  * Форма новой заявки. Реализовать: поля, клиентскую валидацию (время «сейчас» — `container.timeProvider`),
@@ -24,5 +30,26 @@ fun RequestFormScreen(
     onCreated: () -> Unit,
     onSessionExpired: () -> Unit,
 ) {
-    // TODO
+    val viewModel = containerViewModel {
+        RequestFormViewModel(
+            RequestsApi( container.httpClient),
+            container.session,
+            container.timeProvider,
+        )
+    }
+
+    val state by viewModel.state.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.event.collect {
+            when(it){
+                is RequestFormContract.Event.OnBack -> onBack()
+                RequestFormContract.Event.OnCreated -> onCreated()
+                RequestFormContract.Event.OnSessionExpired -> onSessionExpired()
+            }
+        }
+    }
+
+    Column() { }
+
 }

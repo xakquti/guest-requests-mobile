@@ -22,8 +22,7 @@ import java.time.format.ResolverStyle
 class RequestFormViewModel(
     private val requestsApi: RequestsApi,
     private val sessionStorage: SessionStorage,
-    private val timeProvider: TimeProvider,
-    sessionExpired : Boolean
+    private val timeProvider: TimeProvider
 ) : ViewModel() {
     val dateFormat: DateTimeFormatter? = DateTimeFormatter.ofPattern("dd.MM.yyyy").withResolverStyle(ResolverStyle.STRICT)
     val timeFormat: DateTimeFormatter? = DateTimeFormatter.ofPattern("HH:mm").withResolverStyle(ResolverStyle.STRICT)
@@ -33,18 +32,6 @@ class RequestFormViewModel(
     private val _event = MutableSharedFlow<RequestFormContract.Event>()
     val event = _event.asSharedFlow()
 
-    init{
-        if(sessionExpired){
-            viewModelScope.launch {
-                sessionStorage.clear()
-            }
-            _state.update {
-                it.copy(
-                    isSessionExpired = true
-                )
-            }
-        }
-    }
 
     fun onIntent(intent : RequestFormContract.Intent){
         when(intent){
