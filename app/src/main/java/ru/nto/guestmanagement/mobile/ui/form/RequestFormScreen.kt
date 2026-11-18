@@ -19,9 +19,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -46,7 +49,9 @@ import ru.nto.guestmanagement.mobile.di.AppContainer
 import ru.nto.guestmanagement.mobile.ui.TestIds.AUTH_ERROR
 import ru.nto.guestmanagement.mobile.ui.TestIds.AUTH_LOADING
 import ru.nto.guestmanagement.mobile.ui.TestIds.AUTH_SUBMIT
+import ru.nto.guestmanagement.mobile.ui.TestIds.FORM_BACK
 import ru.nto.guestmanagement.mobile.ui.TestIds.FORM_DATE
+import ru.nto.guestmanagement.mobile.ui.TestIds.FORM_ERROR_COMMON
 import ru.nto.guestmanagement.mobile.ui.TestIds.FORM_ERROR_DATE
 import ru.nto.guestmanagement.mobile.ui.TestIds.FORM_ERROR_FULL_NAME
 import ru.nto.guestmanagement.mobile.ui.TestIds.FORM_ERROR_ORGANIZATION
@@ -96,150 +101,13 @@ fun RequestFormScreen(
         }
     }
 
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .padding(horizontal = 16.dp, vertical = 44.dp)
+    Column(
+        modifier = Modifier.fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .imePadding()
     ) {
-        Text(
-            text = stringResource(R.string.form_title),
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-
-        //ФИО
-        Field(
-                hintText = "",
-                fieldName = stringResource(R.string.form_full_name),
-                modifier = Modifier.testTag(FORM_FULL_NAME)
-        )
-        if(state.errorFullName != null){
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = stringResource(R.string.form_error_full_name),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.testTag(FORM_ERROR_FULL_NAME)
-            )
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-
-        //Телефон
-        Field(
-            hintText = "+7",
-            fieldName = stringResource(R.string.form_phone),
-            modifier = Modifier.testTag(FORM_PHONE)
-        )
-        if(state.errorPhoneNumber != null){
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = stringResource(R.string.form_error_phone),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.testTag(FORM_ERROR_PHONE)
-            )
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-
-        //Организация
-        Field(
-            hintText = "",
-            fieldName = stringResource(R.string.form_phone),
-            modifier = Modifier.testTag(FORM_ORGANIZATION)
-        )
-        if(state.errorOrganization != null){
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = stringResource(R.string.form_error_organization),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.testTag(FORM_ERROR_ORGANIZATION)
-            )
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-
-        //Цель
-        Field(
-            hintText = "",
-            fieldName = stringResource(R.string.form_purpose),
-            modifier = Modifier.testTag(FORM_PURPOSE)
-        )
-        if(state.errorPurpose != null){
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = stringResource(R.string.form_error_purpose),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.testTag(FORM_ERROR_PURPOSE)
-            )
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-
-        //Дата
-        Field(
-            hintText = "ДД.ММ.ГГГГ",
-            fieldName = stringResource(R.string.form_date),
-            modifier = Modifier.testTag(FORM_DATE)
-        )
-        if(state.errorDate != null){
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = stringResource(R.string.form_error_date),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.testTag(FORM_ERROR_DATE)
-            )
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-
-        //Время начала
-        Field(
-            hintText = "ЧЧ:ММ",
-            fieldName = stringResource(R.string.form_time_from),
-            modifier = Modifier.testTag(FORM_TIME_FROM)
-        )
-        if(state.errorValidFrom != null){
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = state.validFrom!!,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.testTag(FORM_ERROR_VALID_FROM)
-            )
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-
-        //Время окончания
-        Field(
-            hintText = "ЧЧ:ММ",
-            fieldName = stringResource(R.string.form_time_to),
-            modifier = Modifier.testTag(FORM_TIME_TO)
-        )
-        if(state.errorValidTo != null){
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = state.validTo!!,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.testTag(FORM_ERROR_VALID_TO)
-            )
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-
-        if (state.isLoading) {
-            CircularProgressIndicator(
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(32.dp)
-                    .testTag(FORM_LOADING).align(Alignment.CenterHorizontally)
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-
         Button(
-            enabled = state.isButtonActive && !state.isLoading,
-            onClick = {
-                viewModel.onIntent(RequestFormContract.Intent.OnFormSend)
-            },
+            onClick = onBack,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp)
@@ -248,17 +116,212 @@ fun RequestFormScreen(
                     spotColor = MaterialTheme.colorScheme.primary
                 )
                 .background(MaterialTheme.colorScheme.primary)
-                .testTag(FORM_SUBMIT),
+                .testTag(FORM_BACK),
             shape = RoundedCornerShape(24.dp)
         ) {
-
             Text(
-                text = stringResource(R.string.form_submit),
+                text = "Назад",
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onPrimary
             )
+        }
+        Column(modifier = Modifier
+            .weight(1f)
+            .padding(horizontal = 16.dp)
+            .verticalScroll(rememberScrollState())
+        ) {
+            Text(
+                text = stringResource(R.string.form_title),
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Spacer(modifier = Modifier.height(16.dp))
 
+            //ФИО
+            Field(
+                onValueChange = {
+                    viewModel.onIntent(RequestFormContract.Intent.EnterFullName(it))
+                },
+                hintText = "",
+                fieldName = stringResource(R.string.form_full_name),
+                modifier = Modifier.testTag(FORM_FULL_NAME)
+            )
+            if(state.errorFullName != null){
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = stringResource(R.string.form_error_full_name),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.testTag(FORM_ERROR_FULL_NAME)
+                )
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+
+            //Телефон
+            Field(
+                onValueChange = {
+                    viewModel.onIntent(RequestFormContract.Intent.EnterPhoneNumber(it))
+                },
+                hintText = "+7",
+                fieldName = stringResource(R.string.form_phone),
+                modifier = Modifier.testTag(FORM_PHONE)
+            )
+            if(state.errorPhoneNumber != null){
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = stringResource(R.string.form_error_phone),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.testTag(FORM_ERROR_PHONE)
+                )
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+
+            //Организация
+            Field(
+                onValueChange = {
+                    viewModel.onIntent(RequestFormContract.Intent.EnterOrganization(it))
+                },
+                hintText = "",
+                fieldName = stringResource(R.string.form_phone),
+                modifier = Modifier.testTag(FORM_ORGANIZATION)
+            )
+            if(state.errorOrganization != null){
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = stringResource(R.string.form_error_organization),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.testTag(FORM_ERROR_ORGANIZATION)
+                )
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+
+            //Цель
+            Field(
+                onValueChange = {
+                    viewModel.onIntent(RequestFormContract.Intent.EnterPurpose(it))
+                },
+                hintText = "",
+                fieldName = stringResource(R.string.form_purpose),
+                modifier = Modifier.testTag(FORM_PURPOSE)
+            )
+            if(state.errorPurpose != null){
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = stringResource(R.string.form_error_purpose),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.testTag(FORM_ERROR_PURPOSE)
+                )
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+
+            //Дата
+            Field(
+                onValueChange = {
+                    viewModel.onIntent(RequestFormContract.Intent.EnterDate(it))
+                },
+                hintText = "ДД.ММ.ГГГГ",
+                fieldName = stringResource(R.string.form_date),
+                modifier = Modifier.testTag(FORM_DATE)
+            )
+            if(state.errorDate != null){
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = stringResource(R.string.form_error_date),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.testTag(FORM_ERROR_DATE)
+                )
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+
+            //Время начала
+            Field(
+                onValueChange = {
+                    viewModel.onIntent(RequestFormContract.Intent.EnterValidFrom(it))
+                },
+                hintText = "ЧЧ:ММ",
+                fieldName = stringResource(R.string.form_time_from),
+                modifier = Modifier.testTag(FORM_TIME_FROM)
+            )
+            if(state.errorValidFrom != null){
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = state.validFrom!!,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.testTag(FORM_ERROR_VALID_FROM)
+                )
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+
+            //Время окончания
+            Field(
+                onValueChange = {
+                    viewModel.onIntent(RequestFormContract.Intent.EnterValidTo(it))
+                },
+                hintText = "ЧЧ:ММ",
+                fieldName = stringResource(R.string.form_time_to),
+                modifier = Modifier.testTag(FORM_TIME_TO)
+            )
+            if(state.errorValidTo != null){
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = state.validTo!!,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.testTag(FORM_ERROR_VALID_TO)
+                )
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+
+            if (state.isLoading) {
+                CircularProgressIndicator(
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(32.dp)
+                        .testTag(FORM_LOADING).align(Alignment.CenterHorizontally)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            if (state.error != null){
+                Text(
+                    text = state.error!!,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.testTag(FORM_ERROR_COMMON)
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+            }
+
+            Button(
+                enabled = state.isButtonActive,
+                onClick = {
+                    viewModel.onIntent(RequestFormContract.Intent.OnFormSend)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+                    .shadow(
+                        elevation = 4.dp, shape = RoundedCornerShape(24.dp),
+                        spotColor = MaterialTheme.colorScheme.primary
+                    )
+                    .background(MaterialTheme.colorScheme.primary)
+                    .testTag(FORM_SUBMIT),
+                shape = RoundedCornerShape(24.dp)
+            ) {
+
+                Text(
+                    text = stringResource(R.string.form_submit),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+
+            }
         }
     }
+
 
 }

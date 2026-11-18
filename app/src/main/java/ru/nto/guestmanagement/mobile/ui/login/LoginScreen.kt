@@ -80,6 +80,7 @@ fun LoginScreen(container: AppContainer, sessionExpired: Boolean, onLoggedIn: ()
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
             .padding(horizontal = 16.dp, vertical = 44.dp),
         verticalArrangement = Arrangement.Center
     ) {

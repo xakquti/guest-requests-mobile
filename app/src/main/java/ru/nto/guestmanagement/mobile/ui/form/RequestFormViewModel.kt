@@ -40,7 +40,8 @@ class RequestFormViewModel(
                 _state.update {
                     it.copy(
                         fio = intent.fullName,
-                        isButtonActive = true
+                        isButtonActive = true,
+                        errorFullName = null
                     )
                 }
             }
@@ -48,7 +49,8 @@ class RequestFormViewModel(
                 _state.update {
                     it.copy(
                         organization = intent.organization,
-                        isButtonActive = true
+                        isButtonActive = true,
+                        errorOrganization = null
                     )
                 }
             }
@@ -56,7 +58,8 @@ class RequestFormViewModel(
                 _state.update {
                     it.copy(
                         phoneNumber = intent.phoneNumber,
-                        isButtonActive = true
+                        isButtonActive = true,
+                        errorPhoneNumber = null
                     )
                 }
             }
@@ -64,7 +67,8 @@ class RequestFormViewModel(
                 _state.update {
                     it.copy(
                         purpose = intent.purpose,
-                        isButtonActive = true
+                        isButtonActive = true,
+                        errorPurpose = null
                     )
                 }
             }
@@ -72,7 +76,8 @@ class RequestFormViewModel(
                 _state.update {
                     it.copy(
                         validFrom = intent.validFrom,
-                        isButtonActive = true
+                        isButtonActive = true,
+                        errorValidFrom = null
                     )
                 }
             }
@@ -80,7 +85,8 @@ class RequestFormViewModel(
                 _state.update {
                     it.copy(
                         validTo = intent.validTo,
-                        isButtonActive = true
+                        isButtonActive = true,
+                        errorValidTo = null
                     )
                 }
             }
@@ -89,7 +95,8 @@ class RequestFormViewModel(
                 _state.update {
                     it.copy(
                         date = intent.date,
-                        isButtonActive = true
+                        isButtonActive = true,
+                        errorDate = null
                     )
                 }
             }
@@ -97,11 +104,6 @@ class RequestFormViewModel(
     }
 
     private fun sendForm(){
-        _state.update {
-            it.copy(
-                isLoading = true
-            )
-        }
         val fullName = _state.value.fio
         val organization = _state.value.organization
         val phoneNumber = _state.value.phoneNumber
@@ -111,57 +113,33 @@ class RequestFormViewModel(
         val date = _state.value.date
         val timeNow = timeProvider.now()
 
-        if (validateFullName(fullName) != null){
-            _state.update {
-                it.copy(errorFullName = validateFullName(fullName),
-                    isLoading = false
-                )
-            }
-            return
+        val fullNameErr = validateFullName(fullName)
+        val phoneErr = validatePhone(phoneNumber)
+        val orgErr = when{
+            organization != null && organization.trim().length > 150 -> "Количество символов превышает 150"
+            else -> null
         }
-
-
-        if (validatePhone(phoneNumber) != null){
-            _state.update {
-                it.copy(
-                    errorPhoneNumber = validatePhone(phoneNumber),
-                    isLoading = false
-                )
-            }
-            return
-        }
-
-        if (organization != null && organization.trim().length > 150){
-            _state.update {
-                it.copy(
-                    errorOrganization = "Количество символов превышает 150",
-                    isLoading = false
-                )
-            }
-            return
-        }
-
-        if (validatePurpose(purpose) != null){
-            _state.update {
-                it.copy(
-                    errorPurpose = validatePurpose(purpose),
-                    isLoading = false
-                )
-            }
-            return
-        }
-
+        val purpErr = validatePurpose(purpose)
         val te = validateTime(validFrom, validTo, timeNow, date)
-        if (te.timeToError != null || te.timeFromError != null || te.dateError != null){
-            _state.update {
-                it.copy(
-                    isLoading = false,
-                    errorDate = te.dateError,
-                    errorValidFrom = te.timeFromError,
-                    errorValidTo = te.timeToError
-                )
-            }
+        _state.update {
+            it.copy(
+                errorFullName = fullNameErr,
+                errorPhoneNumber = phoneErr,
+                errorOrganization = orgErr,
+                errorPurpose = purpErr,
+                errorDate = te.dateError,
+                errorValidFrom = te.timeFromError,
+                errorValidTo = te.timeToError
+            )
+        }
+        if (fullNameErr != null || phoneErr != null || orgErr != null || purpErr != null || te.dateError != null || te.timeToError != null || te.timeFromError != null){
             return
+        }
+
+        _state.update {
+            it.copy(
+                isLoading = true
+            )
         }
 
         viewModelScope.launch {

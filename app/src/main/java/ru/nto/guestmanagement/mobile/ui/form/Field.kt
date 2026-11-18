@@ -7,6 +7,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
@@ -16,9 +18,15 @@ import androidx.compose.ui.unit.dp
 fun Field(
     hintText : String,
     fieldName : String,
-    modifier: Modifier
+    modifier: Modifier,
+    onValueChange : (String) -> Unit
 ){
     val state = rememberTextFieldState()
+    LaunchedEffect(state) {
+        snapshotFlow { state.text.toString() }.collect { text ->
+            onValueChange(text)
+        }
+    }
 
     TextField(
         state = state,
