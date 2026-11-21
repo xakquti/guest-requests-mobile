@@ -18,14 +18,16 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.time.format.ResolverStyle
+import java.util.Locale
 
 class RequestFormViewModel(
     private val requestsApi: RequestsApi,
     private val sessionStorage: SessionStorage,
     private val timeProvider: TimeProvider
 ) : ViewModel() {
-    val dateFormat: DateTimeFormatter? = DateTimeFormatter.ofPattern("dd.MM.yyyy").withResolverStyle(ResolverStyle.STRICT)
-    val timeFormat: DateTimeFormatter? = DateTimeFormatter.ofPattern("HH:mm").withResolverStyle(ResolverStyle.STRICT)
+    private val dateFormat: DateTimeFormatter? = DateTimeFormatter.ofPattern("dd.MM.yyyy").withResolverStyle(ResolverStyle.STRICT)
+    private val timeFormat: DateTimeFormatter? = DateTimeFormatter.ofPattern("HH:mm").withResolverStyle(ResolverStyle.STRICT)
+    private val apiFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss", Locale.ROOT)
     private val _state = MutableStateFlow(RequestFormContract.State())
     val state = _state.asStateFlow()
 
@@ -104,6 +106,9 @@ class RequestFormViewModel(
     }
 
     private fun sendForm(){
+        if (_state.value.isLoading){
+            return
+        }
         val fullName = _state.value.fio
         val organization = _state.value.organization
         val phoneNumber = _state.value.phoneNumber
@@ -136,12 +141,6 @@ class RequestFormViewModel(
             return
         }
 
-        _state.update {
-            it.copy(
-                isLoading = true
-            )
-        }
-
         viewModelScope.launch {
             _state.update {
                 it.copy(
@@ -162,12 +161,12 @@ class RequestFormViewModel(
             val code = sessionStorage.current() ?: return@launch
 
             val body = CreateRequestBody(
-                fullName,
-                phoneNumber,
-                organization,
-                purpose,
-                dateTimeFrom.toString(),
-                dateTimeTo.toString()
+                fullName?.trim(),
+                phoneNumber?.trim(),
+                organization?.trim()?.takeIf { it.isNotEmpty() },
+                purpose?.trim(),
+                dateTimeFrom.format(apiFormat),
+                dateTimeTo.format(apiFormat)
             )
             when(val sendForm = requestsApi.create(code, body)){
                 is ApiResult.Success -> {
@@ -191,8 +190,8 @@ class RequestFormViewModel(
                     _state.update {
                         it.copy(
                             isLoading = false,
-                            error = sendForm.message,
-                            isButtonActive = true
+                            isButtonActive = true,
+                            error = "На это время уже есть заявка для указанного телефона"
                         )
                     }
                 }
@@ -210,8 +209,14 @@ class RequestFormViewModel(
                     _state.update {
                         it.copy(
                             isLoading = false,
-                            error = "Ошибка в поле",
-                            isButtonActive = true
+                            error = null,
+                            isButtonActive = true,
+                            errorValidFrom = sendForm.errors["validFrom"],
+                            errorValidTo = sendForm.errors["validTo"],
+                            errorFullName = sendForm.errors["fullName"],
+                            errorPhoneNumber = sendForm.errors["phone"],
+                            errorOrganization = sendForm.errors["organization"],
+                            errorPurpose = sendForm.errors["purpose"]
                         )
                     }
                 }

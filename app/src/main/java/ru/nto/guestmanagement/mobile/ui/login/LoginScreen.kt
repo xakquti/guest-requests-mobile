@@ -60,8 +60,6 @@ fun LoginScreen(container: AppContainer, sessionExpired: Boolean, onLoggedIn: ()
     }
     val state by viewModel.state.collectAsState()
 
-    //проверить все требования
-
     LaunchedEffect(Unit) {
         if (!sessionExpired && !container.session.current().isNullOrEmpty()) {
             onLoggedIn()

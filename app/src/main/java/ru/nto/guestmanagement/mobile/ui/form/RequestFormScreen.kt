@@ -139,6 +139,7 @@ fun RequestFormScreen(
 
             //ФИО
             Field(
+                value = state.fio.orEmpty(),
                 onValueChange = {
                     viewModel.onIntent(RequestFormContract.Intent.EnterFullName(it))
                 },
@@ -149,7 +150,7 @@ fun RequestFormScreen(
             if(state.errorFullName != null){
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = stringResource(R.string.form_error_full_name),
+                    text = state.errorFullName!!,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.testTag(FORM_ERROR_FULL_NAME)
@@ -159,6 +160,7 @@ fun RequestFormScreen(
 
             //Телефон
             Field(
+                value = state.phoneNumber.orEmpty(),
                 onValueChange = {
                     viewModel.onIntent(RequestFormContract.Intent.EnterPhoneNumber(it))
                 },
@@ -169,7 +171,7 @@ fun RequestFormScreen(
             if(state.errorPhoneNumber != null){
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = stringResource(R.string.form_error_phone),
+                    text = state.errorPhoneNumber!!,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.testTag(FORM_ERROR_PHONE)
@@ -179,17 +181,18 @@ fun RequestFormScreen(
 
             //Организация
             Field(
+                value = state.organization.orEmpty(),
                 onValueChange = {
                     viewModel.onIntent(RequestFormContract.Intent.EnterOrganization(it))
                 },
                 hintText = "",
-                fieldName = stringResource(R.string.form_phone),
+                fieldName = stringResource(R.string.form_organization),
                 modifier = Modifier.testTag(FORM_ORGANIZATION)
             )
             if(state.errorOrganization != null){
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = stringResource(R.string.form_error_organization),
+                    text = state.errorOrganization!!,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.testTag(FORM_ERROR_ORGANIZATION)
@@ -199,6 +202,7 @@ fun RequestFormScreen(
 
             //Цель
             Field(
+                value = state.purpose.orEmpty(),
                 onValueChange = {
                     viewModel.onIntent(RequestFormContract.Intent.EnterPurpose(it))
                 },
@@ -209,7 +213,7 @@ fun RequestFormScreen(
             if(state.errorPurpose != null){
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = stringResource(R.string.form_error_purpose),
+                    text = state.errorPurpose!!,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.testTag(FORM_ERROR_PURPOSE)
@@ -219,6 +223,7 @@ fun RequestFormScreen(
 
             //Дата
             Field(
+                value = state.date.orEmpty(),
                 onValueChange = {
                     viewModel.onIntent(RequestFormContract.Intent.EnterDate(it))
                 },
@@ -239,6 +244,7 @@ fun RequestFormScreen(
 
             //Время начала
             Field(
+                value = state.validFrom.orEmpty(),
                 onValueChange = {
                     viewModel.onIntent(RequestFormContract.Intent.EnterValidFrom(it))
                 },
@@ -249,7 +255,7 @@ fun RequestFormScreen(
             if(state.errorValidFrom != null){
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = state.validFrom!!,
+                    text = state.errorValidFrom!!,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.testTag(FORM_ERROR_VALID_FROM)
@@ -259,6 +265,7 @@ fun RequestFormScreen(
 
             //Время окончания
             Field(
+                value = state.validTo.orEmpty(),
                 onValueChange = {
                     viewModel.onIntent(RequestFormContract.Intent.EnterValidTo(it))
                 },
@@ -269,7 +276,7 @@ fun RequestFormScreen(
             if(state.errorValidTo != null){
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = state.validTo!!,
+                    text = state.errorValidTo!!,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.testTag(FORM_ERROR_VALID_TO)

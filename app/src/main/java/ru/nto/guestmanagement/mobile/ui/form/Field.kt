@@ -16,12 +16,13 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun Field(
+    value : String,
     hintText : String,
     fieldName : String,
     modifier: Modifier,
     onValueChange : (String) -> Unit
 ){
-    val state = rememberTextFieldState()
+    val state = rememberTextFieldState(value)
     LaunchedEffect(state) {
         snapshotFlow { state.text.toString() }.collect { text ->
             onValueChange(text)
