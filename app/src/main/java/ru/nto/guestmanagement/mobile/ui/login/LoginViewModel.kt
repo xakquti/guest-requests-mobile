@@ -49,8 +49,7 @@ class LoginViewModel(
             it.copy(
                 login = login,
                 isButtonActive = filterLogin(login),
-                error = null,
-                isSessionExpired = if(login.isNotEmpty()) false else it.isSessionExpired
+                error = null
             )
         }
     }
