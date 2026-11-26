@@ -140,6 +140,9 @@ fun RequestDetailsScreen(
     val state by viewModel.state.collectAsState()
     val detail = state.detail
     val gate = remember { RefreshGate() }
+    DisposableEffect(Unit) {
+        onDispose { gate.cancel() }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.action.collect { a ->
