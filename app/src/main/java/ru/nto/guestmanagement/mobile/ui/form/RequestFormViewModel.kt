@@ -2,6 +2,7 @@ package ru.nto.guestmanagement.mobile.ui.form
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -25,8 +26,10 @@ class RequestFormViewModel(
     private val sessionStorage: SessionStorage,
     private val timeProvider: TimeProvider
 ) : ViewModel() {
-    private val dateFormat: DateTimeFormatter? = DateTimeFormatter.ofPattern("dd.MM.yyyy").withResolverStyle(ResolverStyle.STRICT)
-    private val timeFormat: DateTimeFormatter? = DateTimeFormatter.ofPattern("HH:mm").withResolverStyle(ResolverStyle.STRICT)
+    private val dateFormat = DateTimeFormatter.ofPattern("dd.MM.uuuu", Locale.ROOT).withResolverStyle(
+        ResolverStyle.STRICT)
+    private val timeFormat = DateTimeFormatter.ofPattern("HH:mm", Locale.ROOT).withResolverStyle(
+        ResolverStyle.STRICT)
     private val apiFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss", Locale.ROOT)
     private val _state = MutableStateFlow(RequestFormContract.State())
     val state = _state.asStateFlow()
@@ -34,6 +37,7 @@ class RequestFormViewModel(
     private val _event = MutableSharedFlow<RequestFormContract.Event>()
     val event = _event.asSharedFlow()
 
+    private var job: Job? = null
 
     fun onIntent(intent : RequestFormContract.Intent){
         when(intent){
@@ -42,7 +46,6 @@ class RequestFormViewModel(
                 _state.update {
                     it.copy(
                         fio = intent.fullName,
-                        isButtonActive = true,
                         errorFullName = null
                     )
                 }
@@ -51,7 +54,6 @@ class RequestFormViewModel(
                 _state.update {
                     it.copy(
                         organization = intent.organization,
-                        isButtonActive = true,
                         errorOrganization = null
                     )
                 }
@@ -60,7 +62,6 @@ class RequestFormViewModel(
                 _state.update {
                     it.copy(
                         phoneNumber = intent.phoneNumber,
-                        isButtonActive = true,
                         errorPhoneNumber = null
                     )
                 }
@@ -69,7 +70,6 @@ class RequestFormViewModel(
                 _state.update {
                     it.copy(
                         purpose = intent.purpose,
-                        isButtonActive = true,
                         errorPurpose = null
                     )
                 }
@@ -78,7 +78,6 @@ class RequestFormViewModel(
                 _state.update {
                     it.copy(
                         validFrom = intent.validFrom,
-                        isButtonActive = true,
                         errorValidFrom = null
                     )
                 }
@@ -87,7 +86,6 @@ class RequestFormViewModel(
                 _state.update {
                     it.copy(
                         validTo = intent.validTo,
-                        isButtonActive = true,
                         errorValidTo = null
                     )
                 }
@@ -97,7 +95,6 @@ class RequestFormViewModel(
                 _state.update {
                     it.copy(
                         date = intent.date,
-                        isButtonActive = true,
                         errorDate = null
                     )
                 }
@@ -106,7 +103,7 @@ class RequestFormViewModel(
     }
 
     private fun sendForm(){
-        if (_state.value.isLoading){
+        if (_state.value.isLoading || job?.isActive == true){
             return
         }
         val fullName = _state.value.fio
@@ -121,7 +118,7 @@ class RequestFormViewModel(
         val fullNameErr = validateFullName(fullName)
         val phoneErr = validatePhone(phoneNumber)
         val orgErr = when{
-            organization != null && organization.trim().length > 150 -> "Количество символов превышает 150"
+            organization?.trim() != null && organization.trim().length > 150 -> "Количество символов превышает 150"
             else -> null
         }
         val purpErr = validatePurpose(purpose)
@@ -141,7 +138,7 @@ class RequestFormViewModel(
             return
         }
 
-        viewModelScope.launch {
+        job = viewModelScope.launch {
             _state.update {
                 it.copy(
                     isLoading = true,
@@ -200,7 +197,7 @@ class RequestFormViewModel(
                     _state.update {
                         it.copy(
                             isLoading = false,
-                            error = sendForm.message,
+                            error = "Нет связи",
                             isButtonActive = true
                         )
                     }
@@ -216,7 +213,7 @@ class RequestFormViewModel(
                             errorFullName = sendForm.errors["fullName"],
                             errorPhoneNumber = sendForm.errors["phone"],
                             errorOrganization = sendForm.errors["organization"],
-                            errorPurpose = sendForm.errors["purpose"]
+                            errorPurpose = sendForm.errors["purpose"],
                         )
                     }
                 }
@@ -234,7 +231,7 @@ class RequestFormViewModel(
                     _state.update {
                         it.copy(
                             isLoading = false,
-                            error = "Ошибка в поле",
+                            error = "Ошибка: не найдено",
                             isButtonActive = true
                         )
                     }
@@ -258,6 +255,22 @@ class RequestFormViewModel(
     }
 
     private fun validateTime(timeFrom: String?, timeTo : String?, timeNow :  LocalDateTime, date : String?) : TimeError{
+        var dateError: String? = null
+        if (date.isNullOrBlank()){
+            dateError = "Отстуствует дата"
+        }
+        var timeToError: String? = null
+        if (timeTo.isNullOrBlank()){
+            timeToError = "Отсутствует время окончания"
+        }
+        var timeFromError: String? = null
+        if (timeFrom.isNullOrBlank()){
+            timeFromError = "Отсутствует время начала"
+        }
+        if (dateError != null || timeToError != null || timeFromError != null){
+            return TimeError(dateError, timeFromError, timeToError)
+        }
+
 
         val parseDate = runCatching { LocalDate.parse(date?.trim(), dateFormat) }.getOrNull()
         val parseTimeFrom = runCatching { LocalTime.parse(timeFrom?.trim(), timeFormat) }.getOrNull()
@@ -269,32 +282,25 @@ class RequestFormViewModel(
         val dateTimeTo = if (parseDate != null && parseTimeTo != null)
             LocalDateTime.of(parseDate, parseTimeTo) else null
 
-        val dateError = when{
-            date.isNullOrEmpty() -> "Отстуствует дата"
-            parseDate == null -> "Неверная дата"
-            else -> null
+        when{
+            parseDate == null -> dateError = "Неверная дата"
         }
 
-        val timeFromError = when{
-            timeFrom.isNullOrEmpty() -> "Отсутствует время начала"
-            parseTimeFrom == null -> "Неверное время начала"
-            dateTimeFrom != null && dateTimeFrom.isBefore(timeNow) -> "Время начала не может быть в прошлом"
-            else -> null
+        when{
+            parseTimeFrom == null -> timeFromError = "Неверное время начала"
+            dateTimeFrom != null && dateTimeFrom.isBefore(timeNow) -> timeFromError = "Время начала не может быть в прошлом"
         }
 
-        val timeToError = when {
-            timeTo.isNullOrEmpty() -> "Отсутствует время окончания"
-            parseTimeTo == null -> "Неверное время окончания"
-            dateTimeTo != null && !dateTimeTo.isAfter(dateTimeFrom) -> "Время окончания должно быть позже времени начала"
-            else -> null
+       when {
+            parseTimeTo == null -> timeToError = "Неверное время окончания"
+            dateTimeFrom != null && dateTimeTo != null && !dateTimeTo.isAfter(dateTimeFrom) -> timeToError = "Время окончания должно быть позже времени начала"
+            dateTimeFrom != null && dateTimeTo != null && dateTimeTo.toLocalDate() != dateTimeFrom.toLocalDate() -> timeToError = "Окончание должно быть в тот же день"
         }
-
-
         return TimeError(dateError, timeFromError, timeToError)
     }
 
     private fun validateFullName(fullName : String?) : String? {
-        return if (fullName.isNullOrEmpty()){
+        return if (fullName?.trim().isNullOrEmpty()){
             "Отсутвует ФИО"
         } else if (fullName.trim().length !in 5..150){
             "ФИО должно быть в пределах 5-150 символов"
@@ -304,10 +310,10 @@ class RequestFormViewModel(
     }
 
     private fun validatePhone(phone : String?) : String? {
-        if (phone.isNullOrEmpty()){
+        val phoneTrim = phone?.trim()
+        if (phoneTrim.isNullOrEmpty()){
             return "Отсутствует номер телефона"
         }
-        val phoneTrim = phone.trim()
 
         return if ((phoneTrim.startsWith("+7")) && (phoneTrim.length == 12) && (phoneTrim.substring(2).all { it in '0'..'9' })){
             null
@@ -317,7 +323,7 @@ class RequestFormViewModel(
     }
 
     private fun validatePurpose(purpose : String?) : String? {
-        return if (purpose.isNullOrEmpty()){
+        return if (purpose?.trim().isNullOrEmpty()){
             "Цель отсутствует"
         } else if (purpose.trim().length !in 5..200){
             "Количство символов 5-200"

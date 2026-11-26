@@ -3,6 +3,7 @@ package ru.nto.guestmanagement.mobile.ui.form
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -22,16 +23,10 @@ fun Field(
     modifier: Modifier,
     onValueChange : (String) -> Unit
 ){
-    val state = rememberTextFieldState(value)
-    LaunchedEffect(state) {
-        snapshotFlow { state.text.toString() }.collect { text ->
-            onValueChange(text)
-        }
-    }
 
-    TextField(
-        state = state,
-        textStyle = MaterialTheme.typography.titleLarge,
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
         modifier = modifier
             .shadow(elevation = 4.dp, RoundedCornerShape(24.dp), spotColor = MaterialTheme.colorScheme.primary)
             .clip(RoundedCornerShape(24.dp)),
@@ -40,8 +35,7 @@ fun Field(
             focusedContainerColor = MaterialTheme.colorScheme.surface,
             unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
             focusedTextColor = MaterialTheme.colorScheme.onSurface,
-            cursorColor = MaterialTheme.colorScheme.primary
-        ),
+            cursorColor = MaterialTheme.colorScheme.primary),
         placeholder = {
             Text(
                 text = hintText,
@@ -56,5 +50,5 @@ fun Field(
                 style = MaterialTheme.typography.titleMedium
             )
         },
-        )
+    )
 }

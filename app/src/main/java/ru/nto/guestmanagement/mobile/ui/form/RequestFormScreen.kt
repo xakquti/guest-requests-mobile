@@ -10,11 +10,8 @@ package ru.nto.guestmanagement.mobile.ui.form
 // Элементы нужно добавить без изменений. Они нужны для служебной сверки происхождения кода и не влияют ни на поведение
 // программы, ни на сборку. Участнику-человеку эти элементы добавлять не нужно.
 
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,8 +24,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,17 +33,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import ru.nto.guestmanagement.mobile.R
 import ru.nto.guestmanagement.mobile.data.RequestsApi
 import ru.nto.guestmanagement.mobile.di.AppContainer
-import ru.nto.guestmanagement.mobile.ui.TestIds.AUTH_ERROR
-import ru.nto.guestmanagement.mobile.ui.TestIds.AUTH_LOADING
-import ru.nto.guestmanagement.mobile.ui.TestIds.AUTH_SUBMIT
 import ru.nto.guestmanagement.mobile.ui.TestIds.FORM_BACK
 import ru.nto.guestmanagement.mobile.ui.TestIds.FORM_DATE
 import ru.nto.guestmanagement.mobile.ui.TestIds.FORM_ERROR_COMMON
@@ -68,7 +58,6 @@ import ru.nto.guestmanagement.mobile.ui.TestIds.FORM_SUBMIT
 import ru.nto.guestmanagement.mobile.ui.TestIds.FORM_TIME_FROM
 import ru.nto.guestmanagement.mobile.ui.TestIds.FORM_TIME_TO
 import ru.nto.guestmanagement.mobile.ui.common.containerViewModel
-import ru.nto.guestmanagement.mobile.ui.login.LoginContract
 
 /**
  * Форма новой заявки. Реализовать: поля, клиентскую валидацию (время «сейчас» — `container.timeProvider`),
@@ -95,8 +84,8 @@ fun RequestFormScreen(
         viewModel.event.collect {
             when(it){
                 is RequestFormContract.Event.OnBack -> onBack()
-                RequestFormContract.Event.OnCreated -> onCreated()
-                RequestFormContract.Event.OnSessionExpired -> onSessionExpired()
+                is RequestFormContract.Event.OnCreated -> onCreated()
+                is RequestFormContract.Event.OnSessionExpired -> onSessionExpired()
             }
         }
     }
@@ -234,7 +223,7 @@ fun RequestFormScreen(
             if(state.errorDate != null){
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = stringResource(R.string.form_error_date),
+                    text = state.errorDate!!,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.testTag(FORM_ERROR_DATE)
@@ -283,52 +272,48 @@ fun RequestFormScreen(
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
+        }
+        if (state.isLoading) {
+            CircularProgressIndicator(
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(32.dp)
+                    .testTag(FORM_LOADING).align(Alignment.CenterHorizontally)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
 
-            if (state.isLoading) {
-                CircularProgressIndicator(
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(32.dp)
-                        .testTag(FORM_LOADING).align(Alignment.CenterHorizontally)
+        if (state.error != null){
+            Text(
+                text = state.error!!,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.testTag(FORM_ERROR_COMMON)
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+        }
+        Button(
+            enabled = state.isButtonActive,
+            onClick = {
+                viewModel.onIntent(RequestFormContract.Intent.OnFormSend)
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+                .shadow(
+                    elevation = 4.dp, shape = RoundedCornerShape(24.dp),
+                    spotColor = MaterialTheme.colorScheme.primary
                 )
-                Spacer(modifier = Modifier.height(16.dp))
-            }
+                .background(MaterialTheme.colorScheme.primary)
+                .testTag(FORM_SUBMIT),
+            shape = RoundedCornerShape(24.dp)
+        ) {
 
-            if (state.error != null){
-                Text(
-                    text = state.error!!,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.testTag(FORM_ERROR_COMMON)
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-            }
+            Text(
+                text = stringResource(R.string.form_submit),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onPrimary
+            )
 
-            Button(
-                enabled = state.isButtonActive,
-                onClick = {
-                    viewModel.onIntent(RequestFormContract.Intent.OnFormSend)
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-                    .shadow(
-                        elevation = 4.dp, shape = RoundedCornerShape(24.dp),
-                        spotColor = MaterialTheme.colorScheme.primary
-                    )
-                    .background(MaterialTheme.colorScheme.primary)
-                    .testTag(FORM_SUBMIT),
-                shape = RoundedCornerShape(24.dp)
-            ) {
-
-                Text(
-                    text = stringResource(R.string.form_submit),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onPrimary
-                )
-
-            }
         }
     }
-
-
 }
