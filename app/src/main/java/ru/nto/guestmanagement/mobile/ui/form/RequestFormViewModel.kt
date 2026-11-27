@@ -46,7 +46,7 @@ class RequestFormViewModel(
                 _state.update {
                     it.copy(
                         fio = intent.fullName,
-                        errorFullName = null
+                        errorFullName = if (it.isAfterFirstSubmit) validateFullName(intent.fullName) else null,
                     )
                 }
             }
@@ -54,7 +54,7 @@ class RequestFormViewModel(
                 _state.update {
                     it.copy(
                         organization = intent.organization,
-                        errorOrganization = null
+                        errorOrganization = if (it.isAfterFirstSubmit) validateOrganization(intent.organization) else null
                     )
                 }
             }
@@ -62,7 +62,7 @@ class RequestFormViewModel(
                 _state.update {
                     it.copy(
                         phoneNumber = intent.phoneNumber,
-                        errorPhoneNumber = null
+                        errorPhoneNumber = if (it.isAfterFirstSubmit) validatePhone(intent.phoneNumber) else null
                     )
                 }
             }
@@ -70,7 +70,7 @@ class RequestFormViewModel(
                 _state.update {
                     it.copy(
                         purpose = intent.purpose,
-                        errorPurpose = null
+                        errorPurpose = if (it.isAfterFirstSubmit) validatePurpose(intent.purpose) else null
                     )
                 }
             }
@@ -78,7 +78,7 @@ class RequestFormViewModel(
                 _state.update {
                     it.copy(
                         validFrom = intent.validFrom,
-                        errorValidFrom = null
+                        errorValidFrom = if(it.isAfterFirstSubmit) validateTime(intent.validFrom, it.validTo, timeProvider.now(), it.date).timeFromError else null
                     )
                 }
             }
@@ -86,7 +86,7 @@ class RequestFormViewModel(
                 _state.update {
                     it.copy(
                         validTo = intent.validTo,
-                        errorValidTo = null
+                        errorValidTo = if (it.isAfterFirstSubmit) validateTime(it.validFrom,intent.validTo, timeProvider.now(), it.date).timeToError else null
                     )
                 }
             }
@@ -95,7 +95,7 @@ class RequestFormViewModel(
                 _state.update {
                     it.copy(
                         date = intent.date,
-                        errorDate = null
+                        errorDate = if (it.isAfterFirstSubmit) validateTime(it.validFrom, it.validTo, timeProvider.now(), intent.date).dateError else null
                     )
                 }
             }
@@ -105,6 +105,11 @@ class RequestFormViewModel(
     private fun sendForm(){
         if (_state.value.isLoading || job?.isActive == true){
             return
+        }
+        _state.update {
+            it.copy(
+                error = null
+            )
         }
         val fullName = _state.value.fio
         val organization = _state.value.organization
@@ -117,10 +122,7 @@ class RequestFormViewModel(
 
         val fullNameErr = validateFullName(fullName)
         val phoneErr = validatePhone(phoneNumber)
-        val orgErr = when{
-            organization?.trim() != null && organization.trim().length > 150 -> "Количество символов превышает 150"
-            else -> null
-        }
+        val orgErr = validateOrganization(organization)
         val purpErr = validatePurpose(purpose)
         val te = validateTime(validFrom, validTo, timeNow, date)
         _state.update {
@@ -131,14 +133,15 @@ class RequestFormViewModel(
                 errorPurpose = purpErr,
                 errorDate = te.dateError,
                 errorValidFrom = te.timeFromError,
-                errorValidTo = te.timeToError
+                errorValidTo = te.timeToError,
+                isAfterFirstSubmit = true
             )
         }
         if (fullNameErr != null || phoneErr != null || orgErr != null || purpErr != null || te.dateError != null || te.timeToError != null || te.timeFromError != null){
             return
         }
-
         job = viewModelScope.launch {
+            val code = sessionStorage.current() ?: return@launch
             _state.update {
                 it.copy(
                     isLoading = true,
@@ -154,8 +157,6 @@ class RequestFormViewModel(
 
             val dateTimeFrom = LocalDateTime.of(parseDate, parseTimeFrom)
             val dateTimeTo = LocalDateTime.of(parseDate, parseTimeTo)
-
-            val code = sessionStorage.current() ?: return@launch
 
             val body = CreateRequestBody(
                 fullName?.trim(),
@@ -188,7 +189,7 @@ class RequestFormViewModel(
                         it.copy(
                             isLoading = false,
                             isButtonActive = true,
-                            error = "На это время уже есть заявка для указанного телефона"
+                            error = "На это время уже есть заявка для указанного телефона",
                         )
                     }
                 }
@@ -267,7 +268,7 @@ class RequestFormViewModel(
         if (timeFrom.isNullOrBlank()){
             timeFromError = "Отсутствует время начала"
         }
-        if (dateError != null || timeToError != null || timeFromError != null){
+        if (dateError != null && timeToError != null && timeFromError != null){
             return TimeError(dateError, timeFromError, timeToError)
         }
 
@@ -283,20 +284,28 @@ class RequestFormViewModel(
             LocalDateTime.of(parseDate, parseTimeTo) else null
 
         when{
-            parseDate == null -> dateError = "Неверная дата"
+            parseDate == null && dateError == null-> dateError = "Неверная дата"
         }
 
         when{
-            parseTimeFrom == null -> timeFromError = "Неверное время начала"
-            dateTimeFrom != null && dateTimeFrom.isBefore(timeNow) -> timeFromError = "Время начала не может быть в прошлом"
+            parseTimeFrom == null && timeFromError == null-> timeFromError = "Неверное время начала"
+            dateTimeFrom != null && dateTimeFrom.isBefore(timeNow) && timeFromError == null-> timeFromError = "Время начала не может быть в прошлом"
         }
 
        when {
-            parseTimeTo == null -> timeToError = "Неверное время окончания"
-            dateTimeFrom != null && dateTimeTo != null && !dateTimeTo.isAfter(dateTimeFrom) -> timeToError = "Время окончания должно быть позже времени начала"
-            dateTimeFrom != null && dateTimeTo != null && dateTimeTo.toLocalDate() != dateTimeFrom.toLocalDate() -> timeToError = "Окончание должно быть в тот же день"
+            parseTimeTo == null && timeToError == null-> timeToError = "Неверное время окончания"
+            dateTimeFrom != null && dateTimeTo != null && !dateTimeTo.isAfter(dateTimeFrom) && timeToError == null -> timeToError = "Время окончания должно быть позже времени начала"
+            dateTimeFrom != null && dateTimeTo != null && dateTimeTo.toLocalDate() != dateTimeFrom.toLocalDate() && timeToError == null -> timeToError = "Окончание должно быть в тот же день"
         }
         return TimeError(dateError, timeFromError, timeToError)
+    }
+
+    private fun validateOrganization(organization: String?) : String? {
+        return if (organization?.trim() != null && organization.trim().length > 150){
+            "Количество символов превышает 150"
+        } else {
+            null
+        }
     }
 
     private fun validateFullName(fullName : String?) : String? {

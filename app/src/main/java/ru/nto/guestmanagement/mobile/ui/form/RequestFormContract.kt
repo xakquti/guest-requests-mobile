@@ -4,6 +4,7 @@ sealed interface RequestFormContract {
     data class State(
         val isLoading : Boolean = false,
         val isButtonActive : Boolean = true,
+        val isAfterFirstSubmit : Boolean = false,
         //errors
         val error : String? = null,
         val errorFullName : String? = null,
