@@ -102,8 +102,6 @@ fun RequestFormScreen(
         Button(
             onClick = onBack,
             modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp)
                 .shadow(
                     elevation = 4.dp, shape = RoundedCornerShape(24.dp),
                     spotColor = MaterialTheme.colorScheme.primary
@@ -138,7 +136,7 @@ fun RequestFormScreen(
                 },
                 hintText = "",
                 fieldName = stringResource(R.string.form_full_name),
-                modifier = Modifier.testTag(FORM_FULL_NAME)
+                modifier = Modifier.fillMaxWidth().testTag(FORM_FULL_NAME)
             )
             if(state.errorFullName != null){
                 Spacer(modifier = Modifier.height(4.dp))
@@ -159,7 +157,7 @@ fun RequestFormScreen(
                 },
                 hintText = "+7",
                 fieldName = stringResource(R.string.form_phone),
-                modifier = Modifier.testTag(FORM_PHONE)
+                modifier = Modifier.fillMaxWidth().testTag(FORM_PHONE)
             )
             if(state.errorPhoneNumber != null){
                 Spacer(modifier = Modifier.height(4.dp))
@@ -180,7 +178,7 @@ fun RequestFormScreen(
                 },
                 hintText = "",
                 fieldName = stringResource(R.string.form_organization),
-                modifier = Modifier.testTag(FORM_ORGANIZATION)
+                modifier = Modifier.fillMaxWidth().testTag(FORM_ORGANIZATION)
             )
             if(state.errorOrganization != null){
                 Spacer(modifier = Modifier.height(4.dp))
@@ -201,7 +199,7 @@ fun RequestFormScreen(
                 },
                 hintText = "",
                 fieldName = stringResource(R.string.form_purpose),
-                modifier = Modifier.testTag(FORM_PURPOSE)
+                modifier = Modifier.fillMaxWidth().testTag(FORM_PURPOSE)
             )
             if(state.errorPurpose != null){
                 Spacer(modifier = Modifier.height(4.dp))
@@ -222,7 +220,7 @@ fun RequestFormScreen(
                 },
                 hintText = "ДД.ММ.ГГГГ",
                 fieldName = stringResource(R.string.form_date),
-                modifier = Modifier.testTag(FORM_DATE)
+                modifier = Modifier.fillMaxWidth().testTag(FORM_DATE)
             )
             if(state.errorDate != null){
                 Spacer(modifier = Modifier.height(4.dp))
@@ -243,7 +241,7 @@ fun RequestFormScreen(
                 },
                 hintText = "ЧЧ:ММ",
                 fieldName = stringResource(R.string.form_time_from),
-                modifier = Modifier.testTag(FORM_TIME_FROM)
+                modifier = Modifier.fillMaxWidth().testTag(FORM_TIME_FROM)
             )
             if(state.errorValidFrom != null){
                 Spacer(modifier = Modifier.height(4.dp))
@@ -264,7 +262,7 @@ fun RequestFormScreen(
                 },
                 hintText = "ЧЧ:ММ",
                 fieldName = stringResource(R.string.form_time_to),
-                modifier = Modifier.testTag(FORM_TIME_TO)
+                modifier = Modifier.fillMaxWidth().testTag(FORM_TIME_TO)
             )
             if(state.errorValidTo != null){
                 Spacer(modifier = Modifier.height(4.dp))

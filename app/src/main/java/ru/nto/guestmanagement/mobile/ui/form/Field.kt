@@ -27,9 +27,7 @@ fun Field(
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        modifier = modifier
-            .shadow(elevation = 4.dp, RoundedCornerShape(24.dp), spotColor = MaterialTheme.colorScheme.primary)
-            .clip(RoundedCornerShape(24.dp)),
+        modifier = modifier,
         colors = TextFieldDefaults.colors(
             unfocusedContainerColor = MaterialTheme.colorScheme.surface,
             focusedContainerColor = MaterialTheme.colorScheme.surface,
@@ -50,5 +48,6 @@ fun Field(
                 style = MaterialTheme.typography.titleMedium
             )
         },
+        shape = RoundedCornerShape(24.dp)
     )
 }

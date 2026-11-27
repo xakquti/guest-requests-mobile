@@ -23,10 +23,7 @@ fun LoginField(
         onValueChange = onValueChange,
         value = value,
         textStyle = MaterialTheme.typography.titleLarge,
-        modifier = modifier
-            .clip(RoundedCornerShape(24.dp))
-            .border(width = 1.dp, color = MaterialTheme.colorScheme.onSurfaceVariant,
-                shape = RoundedCornerShape(24.dp)),
+        modifier = modifier,
         colors = TextFieldDefaults.colors(
             unfocusedContainerColor = MaterialTheme.colorScheme.surface,
             focusedContainerColor = MaterialTheme.colorScheme.surface,
@@ -40,7 +37,8 @@ fun LoginField(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.titleMedium
             )
-        }
+        },
+        shape = RoundedCornerShape(24.dp)
     )
 
 }
