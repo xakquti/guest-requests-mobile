@@ -183,7 +183,18 @@ class RequestFormViewModel(
             return
         }
         job = viewModelScope.launch {
-            val code = sessionStorage.current() ?: return@launch
+            val code = sessionStorage.current()
+            if (code == null){
+                _state.update {
+                    it.copy(
+                        isButtonActive = true,
+                        error = null,
+                        isSessionExpired = true
+                    )
+                }
+                _event.emit(RequestFormContract.Event.OnSessionExpired)
+                return@launch
+            }
             _state.update {
                 it.copy(
                     isLoading = true,

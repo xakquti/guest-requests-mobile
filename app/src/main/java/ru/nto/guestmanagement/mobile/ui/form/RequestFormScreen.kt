@@ -136,7 +136,8 @@ fun RequestFormScreen(
                 },
                 hintText = "",
                 fieldName = stringResource(R.string.form_full_name),
-                modifier = Modifier.fillMaxWidth().testTag(FORM_FULL_NAME)
+                modifier = Modifier.fillMaxWidth(),
+                testTag = FORM_FULL_NAME
             )
             if(state.clientErrors.errorFullName != null || state.serverErrors.errorFullName != null){
                 val errName = when{
@@ -162,7 +163,8 @@ fun RequestFormScreen(
                 },
                 hintText = "+7",
                 fieldName = stringResource(R.string.form_phone),
-                modifier = Modifier.fillMaxWidth().testTag(FORM_PHONE)
+                modifier = Modifier.fillMaxWidth(),
+                testTag = FORM_PHONE
             )
             if(state.clientErrors.errorPhoneNumber != null || state.serverErrors.errorPhoneNumber != null){
                 val errPhone = when{
@@ -188,7 +190,8 @@ fun RequestFormScreen(
                 },
                 hintText = "",
                 fieldName = stringResource(R.string.form_organization),
-                modifier = Modifier.fillMaxWidth().testTag(FORM_ORGANIZATION)
+                modifier = Modifier.fillMaxWidth(),
+                testTag = FORM_ORGANIZATION
             )
             if(state.clientErrors.errorOrganization != null || state.serverErrors.errorOrganization != null){
                 val errOrg = when{
@@ -214,7 +217,8 @@ fun RequestFormScreen(
                 },
                 hintText = "",
                 fieldName = stringResource(R.string.form_purpose),
-                modifier = Modifier.fillMaxWidth().testTag(FORM_PURPOSE)
+                modifier = Modifier.fillMaxWidth(),
+                testTag = FORM_PURPOSE
             )
             if(state.clientErrors.errorPurpose != null || state.serverErrors.errorPurpose != null){
                 val errPurpose = when{
@@ -240,7 +244,8 @@ fun RequestFormScreen(
                 },
                 hintText = "ДД.ММ.ГГГГ",
                 fieldName = stringResource(R.string.form_date),
-                modifier = Modifier.fillMaxWidth().testTag(FORM_DATE)
+                modifier = Modifier.fillMaxWidth(),
+                testTag = FORM_DATE
             )
             if(state.clientErrors.errorDate != null || state.serverErrors.errorDate != null){
                 val errDate = when{
@@ -266,7 +271,8 @@ fun RequestFormScreen(
                 },
                 hintText = "ЧЧ:ММ",
                 fieldName = stringResource(R.string.form_time_from),
-                modifier = Modifier.fillMaxWidth().testTag(FORM_TIME_FROM)
+                modifier = Modifier.fillMaxWidth(),
+                testTag = FORM_TIME_FROM
             )
             if(state.clientErrors.errorValidFrom != null || state.serverErrors.errorValidFrom != null){
                 val errTimeFrom = when{
@@ -292,7 +298,8 @@ fun RequestFormScreen(
                 },
                 hintText = "ЧЧ:ММ",
                 fieldName = stringResource(R.string.form_time_to),
-                modifier = Modifier.fillMaxWidth().testTag(FORM_TIME_TO)
+                modifier = Modifier.fillMaxWidth(),
+                testTag = FORM_TIME_TO
             )
             if(state.clientErrors.errorValidTo != null || state.serverErrors.errorValidTo != null){
                 val errTimeTo = when{
