@@ -38,6 +38,7 @@ sealed interface RequestDetailsContract {
         val cancelError: String? = null,
         val showCancelConfirm: Boolean = false
     )
+
     sealed interface Intent {
         data object LoadDetail : Intent
         data object CancelRequest : Intent
@@ -45,6 +46,7 @@ sealed interface RequestDetailsContract {
         data object DismissCancel : Intent
         data object Refresh : Intent
     }
+
     sealed interface Action {
         data object NavigateBack : Action
         data object SessionExpired : Action
@@ -68,6 +70,7 @@ class RequestDetailsViewModel(
             is RequestDetailsContract.Intent.Refresh -> loadDetail()
             is RequestDetailsContract.Intent.CancelRequest ->
                 _state.update { it.copy(showCancelConfirm = true, cancelError = null) }
+
             is RequestDetailsContract.Intent.ConfirmCancel -> confirmCancel()
             is RequestDetailsContract.Intent.DismissCancel ->
                 _state.update { it.copy(showCancelConfirm = false, cancelError = null) }
@@ -85,14 +88,21 @@ class RequestDetailsViewModel(
                 is ApiResult.Success -> _state.update {
                     it.copy(detail = r.value, isLoading = false, isInitialLoading = false)
                 }
+
                 is ApiResult.Network ->
                     if (_state.value.detail == null) _state.update {
-                        it.copy(isLoading = false, isInitialLoading = false, error = "Ошибка загрузки")
+                        it.copy(
+                            isLoading = false,
+                            isInitialLoading = false,
+                            error = "Ошибка загрузки"
+                        )
                     } else _state.update { it.copy(isLoading = false, isOffline = true) }
+
                 ApiResult.Unauthorized -> {
                     sessionStorage.clear()
                     _action.emit(RequestDetailsContract.Action.SessionExpired)
                 }
+
                 else -> _state.update {
                     it.copy(isLoading = false, isInitialLoading = false, error = "Ошибка загрузки")
                 }
@@ -109,18 +119,32 @@ class RequestDetailsViewModel(
                 is ApiResult.Success -> _state.update {
                     it.copy(detail = r.value, showCancelConfirm = false, cancelError = null)
                 }
+
                 is ApiResult.Conflict -> {
-                    _state.update { it.copy(showCancelConfirm = false, cancelError = "Заявка уже рассмотрена") }
+                    _state.update {
+                        it.copy(
+                            showCancelConfirm = false,
+                            cancelError = "Заявка уже рассмотрена"
+                        )
+                    }
                     loadDetail()
                 }
+
                 is ApiResult.Network -> _state.update {
                     it.copy(showCancelConfirm = false, cancelError = "Ошибка сети")
                 }
+
                 ApiResult.Unauthorized -> {
                     sessionStorage.clear()
                     _action.emit(RequestDetailsContract.Action.SessionExpired)
                 }
-                else -> _state.update { it.copy(showCancelConfirm = false, cancelError = "Ошибка отмены") }
+
+                else -> _state.update {
+                    it.copy(
+                        showCancelConfirm = false,
+                        cancelError = "Ошибка отмены"
+                    )
+                }
             }
         }
     }
@@ -140,6 +164,7 @@ fun RequestDetailsScreen(
     val state by viewModel.state.collectAsState()
     val detail = state.detail
     val gate = remember { RefreshGate() }
+
     DisposableEffect(Unit) {
         onDispose { gate.cancel() }
     }
@@ -164,7 +189,10 @@ fun RequestDetailsScreen(
             TopAppBar(
                 title = { Text("Детали заявки") },
                 navigationIcon = {
-                    IconButton(onClick = onBack, modifier = Modifier.testTag(TestIds.DETAILS_BACK)) {
+                    IconButton(
+                        onClick = onBack,
+                        modifier = Modifier.testTag(TestIds.DETAILS_BACK)
+                    ) {
                         Text("←")
                     }
                 },
@@ -177,12 +205,22 @@ fun RequestDetailsScreen(
             )
         }
     ) { padding ->
-        Column(modifier = Modifier.padding(padding).fillMaxSize().padding(16.dp)) {
+        Column(modifier = Modifier
+            .padding(padding)
+            .fillMaxSize()
+            .padding(16.dp)) {
             when {
-                state.isInitialLoading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                state.isInitialLoading -> Box(
+                    Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
                     CircularProgressIndicator()
                 }
-                state.error != null -> Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center) {
+
+                state.error != null -> Column(
+                    Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center
+                ) {
                     Text(state.error!!, modifier = Modifier.testTag(TestIds.DETAILS_ERROR))
                     Spacer(Modifier.height(8.dp))
                     Button(
@@ -190,37 +228,66 @@ fun RequestDetailsScreen(
                         modifier = Modifier.testTag(TestIds.DETAILS_RETRY)
                     ) { Text("Повторить") }
                 }
+
                 detail != null -> {
-                    Text("ID: ${detail.id}", modifier = Modifier.testTag(TestIds.DETAILS_ID))
+                    Row {
+                        Text("ID: ")
+                        Text("${detail.id}", modifier = Modifier.testTag(TestIds.DETAILS_ID))
+                    }
                     Spacer(Modifier.height(8.dp))
                     Text(detail.fullName, modifier = Modifier.testTag(TestIds.DETAILS_NAME))
                     Spacer(Modifier.height(8.dp))
                     Text(detail.phone, modifier = Modifier.testTag(TestIds.DETAILS_PHONE))
                     if (!detail.organization.isNullOrBlank()) {
                         Spacer(Modifier.height(8.dp))
-                        Text(detail.organization!!, modifier = Modifier.testTag(TestIds.DETAILS_ORGANIZATION))
+                        Text(
+                            detail.organization,
+                            modifier = Modifier.testTag(TestIds.DETAILS_ORGANIZATION)
+                        )
                     }
                     Spacer(Modifier.height(8.dp))
                     Text(detail.purpose, modifier = Modifier.testTag(TestIds.DETAILS_PURPOSE))
                     Spacer(Modifier.height(8.dp))
-                    Text(formatDateTime(detail.validFrom), modifier = Modifier.testTag(TestIds.DETAILS_VALID_FROM))
-                    Text(formatDateTime(detail.validTo), modifier = Modifier.testTag(TestIds.DETAILS_VALID_TO))
+                    Text(
+                        formatDateTime(detail.validFrom),
+                        modifier = Modifier.testTag(TestIds.DETAILS_VALID_FROM)
+                    )
+                    Text(
+                        formatDateTime(detail.validTo),
+                        modifier = Modifier.testTag(TestIds.DETAILS_VALID_TO)
+                    )
                     Spacer(Modifier.height(8.dp))
                     StatusLabel(status = detail.status, tag = TestIds.DETAILS_STATUS)
                     Spacer(Modifier.height(8.dp))
-                    Text("Создана: ${formatDateTime(detail.createdAt)}", modifier = Modifier.testTag(TestIds.DETAILS_CREATED_AT))
-                    Text("Изменена: ${formatDateTime(detail.updatedAt)}", modifier = Modifier.testTag(TestIds.DETAILS_UPDATED_AT))
+
+                    Row {
+                        Text("Создана: ")
+                        Text(
+                            formatDateTime(detail.createdAt),
+                            modifier = Modifier.testTag(TestIds.DETAILS_CREATED_AT)
+                        )
+                    }
+
+                    Row {
+                        Text("Изменена: ")
+                        Text(
+                            formatDateTime(detail.updatedAt),
+                            modifier = Modifier.testTag(TestIds.DETAILS_UPDATED_AT)
+                        )
+                    }
 
                     if (!detail.comment.isNullOrBlank()) {
                         Spacer(Modifier.height(8.dp))
                         Text("Комментарий охраны:", style = MaterialTheme.typography.labelMedium)
-                        Text(detail.comment!!, modifier = Modifier.testTag(TestIds.DETAILS_COMMENT))
+                        Text(detail.comment, modifier = Modifier.testTag(TestIds.DETAILS_COMMENT))
                     }
 
                     if (state.cancelError != null) {
                         Spacer(Modifier.height(8.dp))
-                        Text(state.cancelError!!, color = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.testTag(TestIds.DETAILS_CANCEL_ERROR))
+                        Text(
+                            state.cancelError!!, color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.testTag(TestIds.DETAILS_CANCEL_ERROR)
+                        )
                     }
 
                     Spacer(Modifier.height(16.dp))
@@ -254,8 +321,10 @@ fun RequestDetailsScreen(
             }
             if (state.isOffline) {
                 Spacer(Modifier.height(8.dp))
-                Text("Нет связи", color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.testTag(TestIds.DETAILS_OFFLINE))
+                Text(
+                    "Нет связи", color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.testTag(TestIds.DETAILS_OFFLINE)
+                )
             }
         }
     }
