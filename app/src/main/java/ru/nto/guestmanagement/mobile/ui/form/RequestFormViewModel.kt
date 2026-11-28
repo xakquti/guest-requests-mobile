@@ -78,7 +78,9 @@ class RequestFormViewModel(
                 _state.update {
                     it.copy(
                         validFrom = intent.validFrom,
-                        errorValidFrom = if(it.isAfterFirstSubmit) validateTime(intent.validFrom, it.validTo, timeProvider.now(), it.date).timeFromError else null
+                        errorValidFrom = if(it.isAfterFirstSubmit) validateTime(intent.validFrom, it.validTo, timeProvider.now(), it.date).timeFromError else null,
+                        errorValidTo = if(it.isAfterFirstSubmit) validateTime(intent.validFrom, it.validTo, timeProvider.now(), it.date).timeToError else null,
+                        errorDate = if(it.isAfterFirstSubmit) validateTime(intent.validFrom, it.validTo, timeProvider.now(), it.date).dateError else null
                     )
                 }
             }
@@ -86,7 +88,9 @@ class RequestFormViewModel(
                 _state.update {
                     it.copy(
                         validTo = intent.validTo,
-                        errorValidTo = if (it.isAfterFirstSubmit) validateTime(it.validFrom,intent.validTo, timeProvider.now(), it.date).timeToError else null
+                        errorValidTo = if (it.isAfterFirstSubmit) validateTime(it.validFrom,intent.validTo, timeProvider.now(), it.date).timeToError else null,
+                        errorValidFrom = if (it.isAfterFirstSubmit) validateTime(it.validFrom,intent.validTo, timeProvider.now(), it.date).timeFromError else null,
+                        errorDate = if (it.isAfterFirstSubmit) validateTime(it.validFrom,intent.validTo, timeProvider.now(), it.date).dateError else null
                     )
                 }
             }
@@ -95,7 +99,9 @@ class RequestFormViewModel(
                 _state.update {
                     it.copy(
                         date = intent.date,
-                        errorDate = if (it.isAfterFirstSubmit) validateTime(it.validFrom, it.validTo, timeProvider.now(), intent.date).dateError else null
+                        errorDate = if (it.isAfterFirstSubmit) validateTime(it.validFrom, it.validTo, timeProvider.now(), intent.date).dateError else null,
+                        errorValidFrom = if (it.isAfterFirstSubmit) validateTime(it.validFrom, it.validTo, timeProvider.now(), intent.date).timeFromError else null,
+                        errorValidTo = if (it.isAfterFirstSubmit) validateTime(it.validFrom, it.validTo, timeProvider.now(), intent.date).timeToError else null
                     )
                 }
             }
