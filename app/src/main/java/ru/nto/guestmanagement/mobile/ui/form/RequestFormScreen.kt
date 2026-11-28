@@ -138,10 +138,15 @@ fun RequestFormScreen(
                 fieldName = stringResource(R.string.form_full_name),
                 modifier = Modifier.fillMaxWidth().testTag(FORM_FULL_NAME)
             )
-            if(state.errorFullName != null){
+            if(state.clientErrors.errorFullName != null || state.serverErrors.errorFullName != null){
+                val errName = when{
+                    state.clientErrors.errorFullName != null && state.serverErrors.errorFullName != null -> state.serverErrors.errorFullName
+                    state.clientErrors.errorFullName == null && state.serverErrors.errorFullName != null -> state.serverErrors.errorFullName
+                    else -> state.clientErrors.errorFullName
+                }
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = state.errorFullName!!,
+                    text = errName!!,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.testTag(FORM_ERROR_FULL_NAME)
@@ -159,10 +164,15 @@ fun RequestFormScreen(
                 fieldName = stringResource(R.string.form_phone),
                 modifier = Modifier.fillMaxWidth().testTag(FORM_PHONE)
             )
-            if(state.errorPhoneNumber != null){
+            if(state.clientErrors.errorPhoneNumber != null || state.serverErrors.errorPhoneNumber != null){
+                val errPhone = when{
+                    state.clientErrors.errorPhoneNumber != null && state.serverErrors.errorPhoneNumber != null -> state.serverErrors.errorPhoneNumber
+                    state.clientErrors.errorPhoneNumber == null && state.serverErrors.errorPhoneNumber != null -> state.serverErrors.errorPhoneNumber
+                    else -> state.clientErrors.errorPhoneNumber
+                }
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = state.errorPhoneNumber!!,
+                    text = errPhone!!,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.testTag(FORM_ERROR_PHONE)
@@ -180,10 +190,15 @@ fun RequestFormScreen(
                 fieldName = stringResource(R.string.form_organization),
                 modifier = Modifier.fillMaxWidth().testTag(FORM_ORGANIZATION)
             )
-            if(state.errorOrganization != null){
+            if(state.clientErrors.errorOrganization != null || state.serverErrors.errorOrganization != null){
+                val errOrg = when{
+                    state.clientErrors.errorOrganization != null && state.serverErrors.errorOrganization != null -> state.serverErrors.errorOrganization
+                    state.clientErrors.errorOrganization == null && state.serverErrors.errorOrganization != null -> state.serverErrors.errorOrganization
+                    else -> state.clientErrors.errorOrganization
+                }
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = state.errorOrganization!!,
+                    text = errOrg!!,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.testTag(FORM_ERROR_ORGANIZATION)
@@ -201,10 +216,15 @@ fun RequestFormScreen(
                 fieldName = stringResource(R.string.form_purpose),
                 modifier = Modifier.fillMaxWidth().testTag(FORM_PURPOSE)
             )
-            if(state.errorPurpose != null){
+            if(state.clientErrors.errorPurpose != null || state.serverErrors.errorPurpose != null){
+                val errPurpose = when{
+                    state.clientErrors.errorPurpose != null && state.serverErrors.errorPurpose != null -> state.serverErrors.errorPurpose
+                    state.clientErrors.errorPurpose == null && state.serverErrors.errorPurpose != null -> state.serverErrors.errorPurpose
+                    else -> state.clientErrors.errorPurpose
+                }
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = state.errorPurpose!!,
+                    text = errPurpose!!,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.testTag(FORM_ERROR_PURPOSE)
@@ -222,10 +242,15 @@ fun RequestFormScreen(
                 fieldName = stringResource(R.string.form_date),
                 modifier = Modifier.fillMaxWidth().testTag(FORM_DATE)
             )
-            if(state.errorDate != null){
+            if(state.clientErrors.errorDate != null || state.serverErrors.errorDate != null){
+                val errDate = when{
+                    state.clientErrors.errorDate != null && state.serverErrors.errorDate != null -> state.serverErrors.errorDate
+                    state.clientErrors.errorDate == null && state.serverErrors.errorDate != null -> state.serverErrors.errorDate
+                    else -> state.clientErrors.errorDate
+                }
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = state.errorDate!!,
+                    text = errDate!!,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.testTag(FORM_ERROR_DATE)
@@ -243,10 +268,15 @@ fun RequestFormScreen(
                 fieldName = stringResource(R.string.form_time_from),
                 modifier = Modifier.fillMaxWidth().testTag(FORM_TIME_FROM)
             )
-            if(state.errorValidFrom != null){
+            if(state.clientErrors.errorValidFrom != null || state.serverErrors.errorValidFrom != null){
+                val errTimeFrom = when{
+                    state.clientErrors.errorValidFrom != null && state.serverErrors.errorValidFrom != null -> state.serverErrors.errorValidFrom
+                    state.clientErrors.errorValidFrom == null && state.serverErrors.errorValidFrom != null -> state.serverErrors.errorValidFrom
+                    else -> state.clientErrors.errorValidFrom
+                }
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = state.errorValidFrom!!,
+                    text = errTimeFrom!!,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.testTag(FORM_ERROR_VALID_FROM)
@@ -264,10 +294,15 @@ fun RequestFormScreen(
                 fieldName = stringResource(R.string.form_time_to),
                 modifier = Modifier.fillMaxWidth().testTag(FORM_TIME_TO)
             )
-            if(state.errorValidTo != null){
+            if(state.clientErrors.errorValidTo != null || state.serverErrors.errorValidTo != null){
+                val errTimeTo = when{
+                    state.clientErrors.errorValidTo != null && state.serverErrors.errorValidTo != null -> state.serverErrors.errorValidTo
+                    state.clientErrors.errorValidTo == null && state.serverErrors.errorValidTo != null -> state.serverErrors.errorValidTo
+                    else -> state.clientErrors.errorValidTo
+                }
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = state.errorValidTo!!,
+                    text = errTimeTo!!,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.testTag(FORM_ERROR_VALID_TO)

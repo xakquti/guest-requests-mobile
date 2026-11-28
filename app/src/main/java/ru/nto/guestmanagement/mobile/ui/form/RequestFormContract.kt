@@ -1,11 +1,7 @@
 package ru.nto.guestmanagement.mobile.ui.form
 
 sealed interface RequestFormContract {
-    data class State(
-        val isLoading : Boolean = false,
-        val isButtonActive : Boolean = true,
-        val isAfterFirstSubmit : Boolean = false,
-        //errors
+    data class ClientErrors(
         val error : String? = null,
         val errorFullName : String? = null,
         val errorPurpose : String? = null,
@@ -14,6 +10,26 @@ sealed interface RequestFormContract {
         val errorValidTo : String? = null,
         val errorPhoneNumber : String? = null,
         val errorDate : String? = null,
+    )
+    data class ServerErrors(
+        val error : String? = null,
+        val errorFullName : String? = null,
+        val errorPurpose : String? = null,
+        val errorOrganization : String? = null,
+        val errorValidFrom : String? = null,
+        val errorValidTo : String? = null,
+        val errorPhoneNumber : String? = null,
+        val errorDate : String? = null,
+    )
+    data class State(
+        val isLoading : Boolean = false,
+        val isButtonActive : Boolean = true,
+        val isAfterFirstSubmit : Boolean = false,
+        val error : String? = null,
+        //client
+        val clientErrors : ClientErrors = ClientErrors(),
+        //server
+        val serverErrors : ServerErrors = ServerErrors(),
         //fields
         val fio : String? = null,
         val phoneNumber : String? = null,

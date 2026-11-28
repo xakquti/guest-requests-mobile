@@ -46,7 +46,10 @@ class RequestFormViewModel(
                 _state.update {
                     it.copy(
                         fio = intent.fullName,
-                        errorFullName = if (it.isAfterFirstSubmit) validateFullName(intent.fullName) else null,
+                        clientErrors = it.clientErrors.copy(
+                            errorFullName = if (it.isAfterFirstSubmit) validateFullName(intent.fullName) else null
+                        ),
+                        serverErrors = it.serverErrors.copy(errorFullName = null)
                     )
                 }
             }
@@ -54,7 +57,12 @@ class RequestFormViewModel(
                 _state.update {
                     it.copy(
                         organization = intent.organization,
-                        errorOrganization = if (it.isAfterFirstSubmit) validateOrganization(intent.organization) else null
+                        clientErrors = it.clientErrors.copy(
+                            errorOrganization = if (it.isAfterFirstSubmit) validateOrganization(intent.organization) else null
+                        ),
+                        serverErrors = it.serverErrors.copy(
+                            errorOrganization = null
+                        )
                     )
                 }
             }
@@ -62,7 +70,12 @@ class RequestFormViewModel(
                 _state.update {
                     it.copy(
                         phoneNumber = intent.phoneNumber,
-                        errorPhoneNumber = if (it.isAfterFirstSubmit) validatePhone(intent.phoneNumber) else null
+                        clientErrors = it.clientErrors.copy(
+                            errorPhoneNumber = if (it.isAfterFirstSubmit) validatePhone(intent.phoneNumber) else null
+                        ),
+                        serverErrors = it.serverErrors.copy(
+                            errorPhoneNumber = null
+                        )
                     )
                 }
             }
@@ -70,7 +83,12 @@ class RequestFormViewModel(
                 _state.update {
                     it.copy(
                         purpose = intent.purpose,
-                        errorPurpose = if (it.isAfterFirstSubmit) validatePurpose(intent.purpose) else null
+                        clientErrors = it.clientErrors.copy(
+                            errorPurpose = if (it.isAfterFirstSubmit) validatePurpose(intent.purpose) else null
+                        ),
+                        serverErrors = it.serverErrors.copy(
+                            errorPurpose = null
+                        )
                     )
                 }
             }
@@ -78,9 +96,14 @@ class RequestFormViewModel(
                 _state.update {
                     it.copy(
                         validFrom = intent.validFrom,
-                        errorValidFrom = if(it.isAfterFirstSubmit) validateTime(intent.validFrom, it.validTo, timeProvider.now(), it.date).timeFromError else null,
-                        errorValidTo = if(it.isAfterFirstSubmit) validateTime(intent.validFrom, it.validTo, timeProvider.now(), it.date).timeToError else null,
-                        errorDate = if(it.isAfterFirstSubmit) validateTime(intent.validFrom, it.validTo, timeProvider.now(), it.date).dateError else null
+                        clientErrors = it.clientErrors.copy(
+                            errorValidFrom = if(it.isAfterFirstSubmit) validateTime(intent.validFrom, it.validTo, timeProvider.now(), it.date).timeFromError else null,
+                            errorValidTo = if(it.isAfterFirstSubmit) validateTime(intent.validFrom, it.validTo, timeProvider.now(), it.date).timeToError else null,
+                            errorDate = if(it.isAfterFirstSubmit) validateTime(intent.validFrom, it.validTo, timeProvider.now(), it.date).dateError else null
+                        )
+                        , serverErrors = it.serverErrors.copy(
+                            errorValidFrom = null
+                        )
                     )
                 }
             }
@@ -88,9 +111,14 @@ class RequestFormViewModel(
                 _state.update {
                     it.copy(
                         validTo = intent.validTo,
-                        errorValidTo = if (it.isAfterFirstSubmit) validateTime(it.validFrom,intent.validTo, timeProvider.now(), it.date).timeToError else null,
-                        errorValidFrom = if (it.isAfterFirstSubmit) validateTime(it.validFrom,intent.validTo, timeProvider.now(), it.date).timeFromError else null,
-                        errorDate = if (it.isAfterFirstSubmit) validateTime(it.validFrom,intent.validTo, timeProvider.now(), it.date).dateError else null
+                        clientErrors = it.clientErrors.copy(
+                            errorValidTo = if (it.isAfterFirstSubmit) validateTime(it.validFrom,intent.validTo, timeProvider.now(), it.date).timeToError else null,
+                            errorValidFrom = if (it.isAfterFirstSubmit) validateTime(it.validFrom,intent.validTo, timeProvider.now(), it.date).timeFromError else null,
+                            errorDate = if (it.isAfterFirstSubmit) validateTime(it.validFrom,intent.validTo, timeProvider.now(), it.date).dateError else null
+                        ),
+                        serverErrors = it.serverErrors.copy(
+                            errorValidTo = null
+                        )
                     )
                 }
             }
@@ -99,9 +127,14 @@ class RequestFormViewModel(
                 _state.update {
                     it.copy(
                         date = intent.date,
-                        errorDate = if (it.isAfterFirstSubmit) validateTime(it.validFrom, it.validTo, timeProvider.now(), intent.date).dateError else null,
-                        errorValidFrom = if (it.isAfterFirstSubmit) validateTime(it.validFrom, it.validTo, timeProvider.now(), intent.date).timeFromError else null,
-                        errorValidTo = if (it.isAfterFirstSubmit) validateTime(it.validFrom, it.validTo, timeProvider.now(), intent.date).timeToError else null
+                        clientErrors = it.clientErrors.copy(
+                            errorDate = if (it.isAfterFirstSubmit) validateTime(it.validFrom, it.validTo, timeProvider.now(), intent.date).dateError else null,
+                            errorValidFrom = if (it.isAfterFirstSubmit) validateTime(it.validFrom, it.validTo, timeProvider.now(), intent.date).timeFromError else null,
+                            errorValidTo = if (it.isAfterFirstSubmit) validateTime(it.validFrom, it.validTo, timeProvider.now(), intent.date).timeToError else null
+                        ),
+                        serverErrors = it.serverErrors.copy(
+                            errorDate = null
+                        )
                     )
                 }
             }
@@ -133,13 +166,16 @@ class RequestFormViewModel(
         val te = validateTime(validFrom, validTo, timeNow, date)
         _state.update {
             it.copy(
-                errorFullName = fullNameErr,
-                errorPhoneNumber = phoneErr,
-                errorOrganization = orgErr,
-                errorPurpose = purpErr,
-                errorDate = te.dateError,
-                errorValidFrom = te.timeFromError,
-                errorValidTo = te.timeToError,
+                serverErrors = RequestFormContract.ServerErrors(),
+                clientErrors = it.clientErrors.copy(
+                    errorFullName = fullNameErr,
+                    errorPhoneNumber = phoneErr,
+                    errorOrganization = orgErr,
+                    errorPurpose = purpErr,
+                    errorDate = te.dateError,
+                    errorValidFrom = te.timeFromError,
+                    errorValidTo = te.timeToError,
+                ),
                 isAfterFirstSubmit = true
             )
         }
@@ -179,13 +215,24 @@ class RequestFormViewModel(
                             isLoading = false,
                             error = null,
                             isButtonActive = true,
-                            errorDate = null,
-                            errorValidTo = null,
-                            errorValidFrom = null,
-                            errorPurpose = null,
-                            errorOrganization = null,
-                            errorFullName = null,
-                            errorPhoneNumber = null
+                            clientErrors = it.clientErrors.copy(
+                                errorDate = null,
+                                errorValidTo = null,
+                                errorValidFrom = null,
+                                errorPurpose = null,
+                                errorOrganization = null,
+                                errorFullName = null,
+                                errorPhoneNumber = null
+                            ),
+                            serverErrors = it.serverErrors.copy(
+                                errorDate = null,
+                                errorValidTo = null,
+                                errorValidFrom = null,
+                                errorPurpose = null,
+                                errorOrganization = null,
+                                errorFullName = null,
+                                errorPhoneNumber = null
+                            )
                         )
                     }
                     _event.emit(RequestFormContract.Event.OnCreated)
@@ -215,12 +262,14 @@ class RequestFormViewModel(
                             isLoading = false,
                             error = null,
                             isButtonActive = true,
-                            errorValidFrom = sendForm.errors["validFrom"],
-                            errorValidTo = sendForm.errors["validTo"],
-                            errorFullName = sendForm.errors["fullName"],
-                            errorPhoneNumber = sendForm.errors["phone"],
-                            errorOrganization = sendForm.errors["organization"],
-                            errorPurpose = sendForm.errors["purpose"],
+                            serverErrors = it.serverErrors.copy(
+                                errorValidFrom = sendForm.errors["validFrom"],
+                                errorValidTo = sendForm.errors["validTo"],
+                                errorFullName = sendForm.errors["fullName"],
+                                errorPhoneNumber = sendForm.errors["phone"],
+                                errorOrganization = sendForm.errors["organization"],
+                                errorPurpose = sendForm.errors["purpose"]
+                            )
                         )
                     }
                 }
